@@ -190,6 +190,7 @@ public class DispatcherAdapter extends Observable {
      */
     public void leaveRoom(Session session, String body) {
 
+
     }
 
     /**
