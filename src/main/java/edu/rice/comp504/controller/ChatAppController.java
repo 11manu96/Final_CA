@@ -35,6 +35,7 @@ public class ChatAppController {
      */
     public static void notify(Session user, AResponse response) {
 
+
     }
 
     /**

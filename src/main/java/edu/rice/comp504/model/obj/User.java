@@ -1,5 +1,6 @@
 package edu.rice.comp504.model.obj;
 
+import edu.rice.comp504.model.cmd.IUserCmd;
 import org.eclipse.jetty.websocket.api.Session;
 
 import java.util.*;
@@ -142,7 +143,9 @@ public class User implements Observer {
      * @param room the chat room object
      * */
     public void moveToAvailable(ChatRoom room) {
-
+        int chatroomid=room.getId();
+        this.getJoinedRoomIds().remove(chatroomid);
+        this.getAvailableRoomIds().add(chatroomid);
     }
 
     /**
@@ -150,7 +153,8 @@ public class User implements Observer {
      * */
     @Override
     public void update(Observable o, Object arg) {
-
+        IUserCmd cmd= (IUserCmd) arg;
+        cmd.execute(this);
     }
 
 }
