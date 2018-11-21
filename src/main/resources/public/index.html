@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Hello</title>
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/chatapp.js"></script>
+    <link rel="stylesheet" type="text/css" href="view.css" />
+</head>
+<body>
+<div class="fill-col">
+    <div class="padded-box">
+        <div class="center-box">
+            <h3>Login</h3>
+        </div>
+        <div class="center-box">
+            Name: <input type="text" placeholder="Enter your name">
+            Age: <input type="text" placeholder="Enter your age">
+            Location: <input type="text" placeholder="Enter your location">
+            School: <input type="text" placeholder="Enter your school">
+        </div>
+    </div>
+    <div>
+        <hr>
+    </div>
+    <div class="fill-row fill-box">
+        <div class="third-box">
+            <div class="padded-box">
+                <div>
+                    <h3>Chat Rooms</h3>
+                </div>
+                <div class="fill-row">
+                    <div class="third-box">
+                        <select multiple size="10" class="full-width">
+                            <option>Room 1</option>
+                            <option>Room 2</option>
+                        </select>
+                    </div>
+                    <div class="fill-box">
+                        <div class="center-box">
+                            <button>Enter Room</button>
+                        </div>
+                        <div class="center-box">
+                            <button>Exit Room</button>
+                        </div>
+                        <div class="center-box">
+                            <button>Exit All</button>
+                        </div>
+                        <hr>
+                        <div class="center-box">
+                            <button>Join Room</button>
+                        </div>
+                    </div>
+                    <div class="third-box">
+                        <select multiple size="10" class="full-width">
+                            <option>Room 3</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="padded-box">
+                <div>
+                    <h3>Create Room</h3>
+                </div>
+                <table class="full-width">
+                    <tr>
+                        <td>Name:</td>
+                        <td>
+                            <input type="text" placeholder="Enter room name">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Ages:</td>
+                        <td>
+                            <input type="number" min="0" max="100" placeholder="Min"> -
+                            <input type="number" min="0" max="100" placeholder="Max">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Locations:</td>
+                        <td>
+                            <select multiple size="5" class="full-width">
+                                <option>North America</option>
+                                <option>Asia</option>
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Schools:</td>
+                        <td>
+                            <select multiple size="5" class="full-width">
+                                <option>Rice</option>
+                                <option>Harvard</option>
+                                <option>Duke</option>
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+                <div class="center-box">
+                    <button>Create</button>
+                </div>
+            </div>
+        </div>
+        <div class="fill-col fill-box padded-box">
+            <div>
+                <h3>Room Name - Owned by User 1</h3>
+            </div>
+            <div class="fill-row fill-box">
+                <div class="fifth-box">
+                    <select multiple size="20" class="full-width full-height">
+                        <option>User 1</option>
+                        <option>User 2</option>
+                        <option>User 3</option>
+                    </select>
+                </div>
+                <div class="fill-col fill-box">
+                    <div id="chat-dialog" class="fill-box">
+                        <ul>Test test test</ul>
+                    </div>
+                    <div class="fill-row">
+                        <input type="text" class="fill-box">
+                        <button>Send Message</button>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <p>Notification:</p>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
