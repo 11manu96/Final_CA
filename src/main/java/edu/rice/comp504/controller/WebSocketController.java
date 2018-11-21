@@ -1,5 +1,6 @@
 package edu.rice.comp504.controller;
 
+import edu.rice.comp504.model.DispatcherAdapter;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketConnect;
@@ -29,7 +30,14 @@ public class WebSocketController {
      */
     @OnWebSocketMessage
     public void onMessage(Session user, String message) {
+        DispatcherAdapter dis = ChatAppController.getDispatcher();
+        String[] tokens = message.split(" ", 2);
+        String cmd = tokens[0];
+        switch (cmd) {
+            case "send":
+                dis.sendMessage(user, tokens[1]);
 
+        }
     }
 
     /**

@@ -3,6 +3,8 @@ package edu.rice.comp504.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.JsonObject;
+import edu.rice.comp504.controller.ChatAppController;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -136,7 +138,53 @@ public class DispatcherAdapter extends Observable {
      * @param body of format "roomId receiverId rawMessage"
      */
     public void sendMessage(Session session, String body) {
+        //parse the body
+        String[] tokens = body.split(" ", 3);
+        int roomId = Integer.valueOf(tokens[0]);
+        String rawMessage = tokens[2];
 
+        //get the sender
+        int senderId = userIdFromSession.get(session);
+        User sender = users.get(senderId);
+
+        //get the charRoom
+        ChatRoom chatRoom = rooms.get(roomId);
+
+        //get receivers
+        User owner = chatRoom.getOwner();
+        Map<Integer, String> receivers = new HashMap<>();
+
+        if (sender == owner) {//admin check
+            receivers = chatRoom.getUsers();
+
+        } else {
+            int receiverId = Integer.valueOf(tokens[1]);
+            receivers.put(receiverId, users.get(receiverId).getName());
+        }
+
+        //send message
+        for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
+
+            //get the receiver
+            int receiverId = entry.getKey();
+            User receiver = users.get(receiverId);
+
+            //construct the message
+            Message message = new Message(nextMessageId, roomId, senderId, receiverId, rawMessage);
+            nextMessageId++;
+
+            //store the message
+            chatRoom.storeMessage(sender, receiver, message);
+
+            //get the chatHistory
+            List<Message> chatHistory = getChatHistory(roomId, senderId, receiverId);
+            chatHistory.add(message);
+
+            //response
+            UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse("DispatcherAdatpter", chatHistory);
+            notifyClient(receiver, userChatHistoryResponse);
+
+        }
     }
 
     /**
@@ -163,6 +211,8 @@ public class DispatcherAdapter extends Observable {
      * @param response the information for notifying
      */
     public void notifyClient(User user, AResponse response) {
+
+        ChatAppController.notify(user.getSession(), response);
 
     }
 
@@ -192,6 +242,21 @@ public class DispatcherAdapter extends Observable {
      * @return chat history between user A and user B at a chat room
      */
     private List<Message> getChatHistory(int roomId, int userAId, int userBId) {
+        //get all chatHistory
+        ChatRoom chatRoom = rooms.get(roomId);
+        Map<String, List<Message>> chatHistory = chatRoom.getChatHistory();
+
+        //combine two users
+        String combineId = userAId < userBId ?
+                String.valueOf(userAId) + String.valueOf(userBId) : String.valueOf(userBId) + String.valueOf(userAId);
+
+        //filter the chatHistory
+        for (Map.Entry<String, List<Message>> entry : chatHistory.entrySet()) {
+            if (entry.getKey().equals(combineId))
+                return entry.getValue();
+
+        }
+
         return null;
     }
 }

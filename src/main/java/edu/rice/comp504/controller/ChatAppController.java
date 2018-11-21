@@ -1,5 +1,6 @@
 package edu.rice.comp504.controller;
 
+import edu.rice.comp504.model.obj.User;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.res.AResponse;
@@ -34,7 +35,12 @@ public class ChatAppController {
      * @param response the notification information
      */
     public static void notify(Session user, AResponse response) {
+        try {
+            user.getRemote().sendString(String.valueOf(response.toJson()));
 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
