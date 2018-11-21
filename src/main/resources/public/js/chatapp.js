@@ -12,7 +12,9 @@ window.onload = function() {
     $("#btn-exit-all").onclick(exitAllRooms);
     $("#btn-join").onclick(joinRoom);
     $("#btn-create").onclick(createRoom);
+    $(".opt-room-user").onclick(loadMessages);
     $("#btn-send").onclick(sendMessage);
+    $("#btn-send-all").onclick(sendAll);
 
     webSocket.onmessage = function(message) {
         updateChatApp(message);
@@ -69,9 +71,24 @@ function createRoom() {
 }
 
 /**
+ * Send request to websocket to retrieve message history
+ */
+function loadMessages() {
+    var user = $("#slt-room-users").val();
+}
+
+/**
  * Send request to websocket to send message
  */
 function sendMessage() {
+    var user = $("#slt-room-users").val();
+    var message = $("#chat-message").val();
+}
+
+/**
+ * Send request to websocket to send message to all users
+ */
+function sendAll() {
     var message = $("#chat-message").val();
 }
 
