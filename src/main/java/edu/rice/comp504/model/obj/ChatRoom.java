@@ -20,6 +20,9 @@ public class ChatRoom extends Observable {
 
     private DispatcherAdapter dis;
 
+    // Maps user id to the user name
+    private Map<Integer, String> userNameFromUserId;
+
     // notifications contain why the user left, etc.
     private List<String> notifications;
 
@@ -52,6 +55,7 @@ public class ChatRoom extends Observable {
 
         this.dis = dispatcher;
 
+        this.userNameFromUserId = new ConcurrentHashMap<>();
         this.notifications = new LinkedList<>();
         this.chatHistory = new ConcurrentHashMap<>();
     }
