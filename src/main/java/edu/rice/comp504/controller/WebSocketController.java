@@ -1,5 +1,7 @@
 package edu.rice.comp504.controller;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import edu.rice.comp504.model.DispatcherAdapter;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketClose;
@@ -31,11 +33,13 @@ public class WebSocketController {
     @OnWebSocketMessage
     public void onMessage(Session user, String message) {
         DispatcherAdapter dis = ChatAppController.getDispatcher();
-        String[] tokens = message.split(" ", 2);
-        String cmd = tokens[0];
+
+        JsonObject jo = new JsonParser().parse(message).getAsJsonObject().getAsJsonObject("body");
+        String cmd = jo.get("type").getAsString();
+
         switch (cmd) {
             case "send":
-                dis.sendMessage(user, tokens[1]);
+                dis.sendMessage(user, message);
 
         }
     }

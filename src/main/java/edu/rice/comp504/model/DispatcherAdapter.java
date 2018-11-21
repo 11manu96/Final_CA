@@ -4,6 +4,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import edu.rice.comp504.controller.ChatAppController;
 import org.eclipse.jetty.websocket.api.Session;
 
@@ -139,9 +140,9 @@ public class DispatcherAdapter extends Observable {
      */
     public void sendMessage(Session session, String body) {
         //parse the body
-        String[] tokens = body.split(" ", 3);
-        int roomId = Integer.valueOf(tokens[0]);
-        String rawMessage = tokens[2];
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        int roomId = jo.get("roomId").getAsInt();
+        String rawMessage = jo.get("message").getAsString();
 
         //get the sender
         int senderId = userIdFromSession.get(session);
@@ -158,7 +159,7 @@ public class DispatcherAdapter extends Observable {
             receivers = chatRoom.getUsers();
 
         } else {
-            int receiverId = Integer.valueOf(tokens[1]);
+            int receiverId = jo.get("reveiverId").getAsInt();
             receivers.put(receiverId, users.get(receiverId).getName());
         }
 
