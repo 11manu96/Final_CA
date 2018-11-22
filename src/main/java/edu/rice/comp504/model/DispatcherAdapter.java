@@ -233,6 +233,7 @@ public class DispatcherAdapter extends Observable {
             e.printStackTrace();
         }
     }
+    
 
     /**
      * Get the names of all chat room members.
