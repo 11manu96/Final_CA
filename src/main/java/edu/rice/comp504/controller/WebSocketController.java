@@ -41,6 +41,7 @@ public class WebSocketController {
                 break;
             case "send":
                 dis.sendMessage(user, message);
+                break;
             default:
                 break;
         }
