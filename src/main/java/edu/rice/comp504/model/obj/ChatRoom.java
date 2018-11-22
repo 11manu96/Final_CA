@@ -154,15 +154,14 @@ public class ChatRoom extends Observable {
      * Delete user from observer list
      */
     public boolean removeUser(User user, String reason) {
-        int userid=user.getId();
-        Map <Integer,String> users = this.getUsers();
+        int userid = user.getId();
+        Map<Integer,String> users = this.getUsers();
         if (users.containsKey(userid)) {
             users.remove(user.getId());
             notifications.add(reason);
             deleteObserver(user);
             return true;
-        }
-        else {
+        }  else {
             return false;
         }
     }

@@ -9,8 +9,8 @@ public class LeaveRoomCmd implements IUserCmd {
 
 
     public LeaveRoomCmd(ChatRoom chatRoom, User user) {
-        this.chatRoom=chatRoom;
-        this.user=user;
+        this.chatRoom = chatRoom;
+        this.user = user;
     }
 
 
