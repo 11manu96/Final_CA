@@ -74,6 +74,6 @@ public class JoinRoomCmd implements IUserCmd{
     @Override
     public void execute(User context) {
         chatRoom.addUser(context);
-        context.addRoom(chatRoom);
+        context.moveToJoined(chatRoom);
     }
 }
