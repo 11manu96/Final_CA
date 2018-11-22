@@ -3,6 +3,8 @@ package edu.rice.comp504.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -74,7 +76,23 @@ public class DispatcherAdapter extends Observable {
      * @return the new user that has been loaded
      */
     public User loadUser(Session session, String body) {
-        return null;
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        String name = jo.get("name").getAsString();
+        int age = jo.get("age").getAsInt();
+        String location = jo.get("location").getAsString();
+        String school = jo.get("school").getAsString();
+        ChatRoom[] room = new ChatRoom[rooms.size()];
+        for(int i = 0; i < rooms.size(); i++){
+            room[i] = rooms.get(i);
+        }
+        User user = new User(nextUserId,session,name,age,location,school,room);
+        addObserver(user);
+        userIdFromSession.put(session,nextUserId);
+        users.put(nextUserId,user);
+        NewUserResponse newUserResponse = new NewUserResponse("NewUser",nextUserId,name);
+        notifyClient(user,newUserResponse);
+        nextUserId++;
+        return user;
     }
 
     /**
