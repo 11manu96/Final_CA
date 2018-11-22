@@ -17,6 +17,7 @@ public class WebSocketController {
 
     /**
      * Open user's session.
+     *
      * @param user The user whose session is opened.
      */
     @OnWebSocketConnect
@@ -27,7 +28,8 @@ public class WebSocketController {
 
     /**
      * Send a message.
-     * @param user  The session user sending the message.
+     *
+     * @param user    The session user sending the message.
      * @param message The message to be sent.
      */
     @OnWebSocketMessage
@@ -37,6 +39,9 @@ public class WebSocketController {
         String cmd = jo.get("type").getAsString();
 
         switch (cmd) {
+            case "login":
+                dis.loadUser(user, message);
+                break;
             case "create":
                 dis.loadRoom(user, message);
                 break;
@@ -50,6 +55,7 @@ public class WebSocketController {
 
     /**
      * Close the user's session.
+     *
      * @param user The use whose session is closed.
      */
     @OnWebSocketClose
