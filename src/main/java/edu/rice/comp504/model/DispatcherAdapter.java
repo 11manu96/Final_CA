@@ -159,7 +159,7 @@ public class DispatcherAdapter extends Observable {
             receivers = chatRoom.getUsers();
 
         } else {
-            int receiverId = jo.get("reveiverId").getAsInt();
+            int receiverId = jo.get("receiverId").getAsInt();
             receivers.put(receiverId, users.get(receiverId).getName());
         }
 
