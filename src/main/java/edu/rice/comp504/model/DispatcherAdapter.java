@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -165,7 +166,20 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "roomId"
      */
     public void joinRoom(Session session, String body) {
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        int roomId = jo.get("roomId").getAsInt();
 
+        ChatRoom chatRoom = this.rooms.get(roomId);
+        int userId = getUserIdFromSession(session);
+        User user = this.users.get(userId);
+
+        boolean userValid = chatRoom.applyFilter(user);
+        if (userValid) {
+            JoinRoomCmd joinRoomCmd = new JoinRoomCmd(chatRoom, user);
+            joinRoomCmd.execute(user);
+        } else {
+            //TODO notify the user is not valid.
+        }
     }
 
     /**
