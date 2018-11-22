@@ -32,8 +32,9 @@ public class LeaveRoomCmd implements IUserCmd {
 
     @Override
     public void execute(User context) {
-
-        chatRoom.removeUser(user, user.getName() + "leaves chatroom");
-        user.moveToAvailable(chatRoom);
+        if (context.getId() == user.getId()) {
+            chatRoom.removeUser(user, user.getName() + "leaves chatroom");
+            user.moveToAvailable(chatRoom);
+        }
     }
 }
