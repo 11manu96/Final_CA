@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import edu.rice.comp504.model.cmd.LeaveRoomCmd;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -149,6 +150,33 @@ public class DispatcherAdapter extends Observable {
      * @param body of format "roomId"
      */
     public void leaveRoom(Session session, String body) {
+        //parsebody
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject(body);
+
+        //getroom
+        int roomId = jo.get("roomId").getAsInt();
+        ChatRoom chatRoom = this.rooms.get(roomId);
+
+        //getuser
+        User user = this.users.get(userIdFromSession.get(session));
+
+        //leaveroom
+        setChanged();
+        notifyObservers(new LeaveRoomCmd(chatRoom, user));
+
+        //notification response
+        RoomNotificationResponse roomNotificationResponse=new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+        notifyClient(user, roomNotificationResponse);
+
+        //userrooomlist response
+        UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+        notifyClient(user,userRoomResponse);
+
+        //roomuserlist response
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+        notifyClient(user, roomUsersResponse);
+
+
 
 
     }
@@ -262,7 +290,7 @@ public class DispatcherAdapter extends Observable {
             e.printStackTrace();
         }
     }
-    
+
 
     /**
      * Get the names of all chat room members.
