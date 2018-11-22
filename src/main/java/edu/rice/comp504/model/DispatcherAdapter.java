@@ -102,7 +102,36 @@ public class DispatcherAdapter extends Observable {
      * @return the new room that has been loaded
      */
     public ChatRoom loadRoom(Session session, String body) {
-        return null;
+        // parse the body
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        String roomName = jo.get("roomName").getAsString();
+        int ageLower = jo.get("ageLower").getAsInt();
+        int ageUpper = jo.get("ageUpper").getAsInt();
+        String[] locations = jo.get("location").getAsString().split(",");
+        String[] schools = jo.get("school").getAsString().split(",");
+        // get owner
+        int ownerId = getUserIdFromSession(session);
+        User owner = this.users.get(ownerId);
+        // create chatroom
+        ChatRoom newRoom = new ChatRoom(this.nextRoomId, roomName, owner,
+                ageLower, ageUpper, locations, schools, this);
+        // check if the owner is valid to join the room
+        boolean ownerValid = newRoom.applyFilter(owner);
+        if (ownerValid) {
+            owner.addRoom(newRoom);
+            owner.moveToJoined(newRoom);
+            this.rooms.put(nextRoomId, newRoom);
+            // create response
+            NewRoomResponse newRoomResponse = new NewRoomResponse("NewRoom", nextRoomId, roomName, ownerId);
+            // notify the owner
+            notifyClient(owner, newRoomResponse);
+            // increase nextRoomId
+            nextRoomId++;
+            return newRoom;
+        } else {
+            // TODO: notify the owner he is invalid
+            return null;
+        }
     }
 
     /**
@@ -154,7 +183,56 @@ public class DispatcherAdapter extends Observable {
      * @param body of format "roomId receiverId rawMessage"
      */
     public void sendMessage(Session session, String body) {
+        //parse the body
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        int roomId = jo.get("roomId").getAsInt();
+        String rawMessage = jo.get("message").getAsString();
 
+        //get the sender
+        int senderId = userIdFromSession.get(session);
+        User sender = users.get(senderId);
+
+        //get the charRoom
+        ChatRoom chatRoom = rooms.get(roomId);
+
+        //get receivers
+        User owner = chatRoom.getOwner();
+        Map<Integer, String> receivers = new HashMap<>();
+
+        if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
+                receivers = chatRoom.getUsers();
+
+        } else {
+            int receiverId = jo.get("receiverId").getAsInt();
+            receivers.put(receiverId, users.get(receiverId).getName());
+        }
+
+        //send message
+        for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
+
+            //get the receiver
+            int receiverId = entry.getKey();
+            User receiver = users.get(receiverId);
+
+            if (receiver == sender)//when the owner sends to all users, won't send to himself
+                continue;
+
+            //construct the message
+            Message message = new Message(nextMessageId, roomId, senderId, receiverId, rawMessage);
+            nextMessageId++;
+
+            //store the message
+            chatRoom.storeMessage(sender, receiver, message);
+
+            //get the chatHistory
+            List<Message> chatHistory = getChatHistory(roomId, senderId, receiverId);
+            chatHistory.add(message);
+
+            //response
+            UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse("DispatcherAdatpter", chatHistory);
+            notifyClient(receiver, userChatHistoryResponse);
+
+        }
     }
 
     /**
@@ -182,6 +260,8 @@ public class DispatcherAdapter extends Observable {
      */
     public static void notifyClient(User user, AResponse response) {
 
+        notifyClient(user.getSession(), response);
+
     }
 
 
@@ -191,8 +271,13 @@ public class DispatcherAdapter extends Observable {
      * @param response the notification information
      */
     public static void notifyClient(Session session, AResponse response) {
-
+        try {
+            session.getRemote().sendString(String.valueOf(response.toJson()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+    
 
     /**
      * Get the names of all chat room members.
@@ -220,6 +305,21 @@ public class DispatcherAdapter extends Observable {
      * @return chat history between user A and user B at a chat room
      */
     private List<Message> getChatHistory(int roomId, int userAId, int userBId) {
+        //get all chatHistory
+        ChatRoom chatRoom = rooms.get(roomId);
+        Map<String, List<Message>> chatHistory = chatRoom.getChatHistory();
+
+        //combine two users
+        String combineId = userAId < userBId ?
+                String.valueOf(userAId) + String.valueOf(userBId) : String.valueOf(userBId) + String.valueOf(userAId);
+
+        //filter the chatHistory
+        for (Map.Entry<String, List<Message>> entry : chatHistory.entrySet()) {
+            if (entry.getKey().equals(combineId))
+                return entry.getValue();
+
+        }
+
         return null;
     }
 }

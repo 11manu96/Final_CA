@@ -35,9 +35,15 @@ public class WebSocketController {
         DispatcherAdapter dis = ChatAppController.getDispatcher();
         JsonObject jo = new JsonParser().parse(message).getAsJsonObject().getAsJsonObject("body");
         String cmd = jo.get("type").getAsString();
-        switch (cmd){
-            case "login":
-                dis.loadUser(user,message);
+
+        switch (cmd) {
+            case "create":
+                dis.loadRoom(user, message);
+                break;
+            case "send":
+                dis.sendMessage(user, message);
+                break;
+            default:
                 break;
         }
     }
