@@ -3,6 +3,8 @@ package edu.rice.comp504.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -84,7 +86,36 @@ public class DispatcherAdapter extends Observable {
      * @return the new room that has been loaded
      */
     public ChatRoom loadRoom(Session session, String body) {
-        return null;
+        // parse the body
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        String roomName = jo.get("roomName").getAsString();
+        int ageLower = jo.get("ageLower").getAsInt();
+        int ageUpper = jo.get("ageUpper").getAsInt();
+        String[] locations = jo.get("location").getAsString().split(",");
+        String[] schools = jo.get("school").getAsString().split(",");
+        // get owner
+        int ownerId = getUserIdFromSession(session);
+        User owner = this.users.get(ownerId);
+        // create chatroom
+        ChatRoom newRoom = new ChatRoom(this.nextRoomId, roomName, owner,
+                ageLower, ageUpper, locations, schools, this);
+        // check if the owner is valid to join the room
+        boolean ownerValid = newRoom.applyFilter(owner);
+        if (ownerValid) {
+            owner.addRoom(newRoom);
+            owner.moveToJoined(newRoom);
+            this.rooms.put(nextRoomId, newRoom);
+            // create response
+            NewRoomResponse newRoomResponse = new NewRoomResponse("NewRoom", nextRoomId, roomName, ownerId);
+            // notify the owner
+            notifyClient(owner, newRoomResponse);
+            // increase nextRoomId
+            nextRoomId++;
+            return newRoom;
+        } else {
+            // TODO: notify the owner he is invalid
+            return null;
+        }
     }
 
     /**
