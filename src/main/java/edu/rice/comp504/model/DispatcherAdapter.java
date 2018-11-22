@@ -219,6 +219,33 @@ public class DispatcherAdapter extends Observable {
         notifyClient(user, roomUsersResponse);
 
 
+        //parsebody
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject(body);
+
+        //getroom
+        int roomId = jo.get("roomId").getAsInt();
+        ChatRoom chatRoom = this.rooms.get(roomId);
+
+        //getuser
+        User user = this.users.get(userIdFromSession.get(session));
+
+        //leaveroom
+        setChanged();
+        notifyObservers(new LeaveRoomCmd(chatRoom, user));
+
+        //notification response
+        RoomNotificationResponse roomNotificationResponse=new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+        notifyClient(user, roomNotificationResponse);
+
+        //userrooomlist response
+        UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+        notifyClient(user,userRoomResponse);
+
+        //roomuserlist response
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+        notifyClient(user, roomUsersResponse);
+
+
 
 
 
