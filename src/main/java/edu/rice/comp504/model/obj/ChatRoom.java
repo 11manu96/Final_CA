@@ -1,7 +1,6 @@
 package edu.rice.comp504.model.obj;
 
 import edu.rice.comp504.model.DispatcherAdapter;
-import edu.rice.comp504.model.cmd.CollectNamesCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
 
 import java.util.*;
@@ -113,9 +112,7 @@ public class ChatRoom extends Observable {
      * Return users in the chat room
      */
     public Map<Integer, String> getUsers() {
-        notifyObservers(CollectNamesCmd.makeCmd());
-        Map <Integer,String> users=CollectNamesCmd.getNames();
-        return users;
+        return this.userNameFromUserId;
     }
 
     /**
