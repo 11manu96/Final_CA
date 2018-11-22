@@ -165,12 +165,12 @@ public class DispatcherAdapter extends Observable {
         notifyObservers(new LeaveRoomCmd(chatRoom, user));
 
         //notification response
-        RoomNotificationResponse roomNotificationResponse=new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
         notifyClient(user, roomNotificationResponse);
 
         //userrooomlist response
         UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
-        notifyClient(user,userRoomResponse);
+        notifyClient(user, userRoomResponse);
 
         //roomuserlist response
         RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
