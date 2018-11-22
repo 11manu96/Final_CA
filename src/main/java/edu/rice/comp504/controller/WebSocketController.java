@@ -39,6 +39,9 @@ public class WebSocketController {
             case "create":
                 dis.loadRoom(user, message);
                 break;
+            case "send":
+                dis.sendMessage(user, message);
+                break;
             default:
                 break;
         }
