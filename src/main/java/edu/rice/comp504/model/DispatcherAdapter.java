@@ -166,7 +166,10 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "roomId"
      */
     public void joinRoom(Session session, String body) {
-        ChatRoom chatRoom = this.rooms.get(body);
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        int roomId = jo.get("roomId").getAsInt();
+
+        ChatRoom chatRoom = this.rooms.get(roomId);
         int userId = getUserIdFromSession(session);
         User user = this.users.get(userId);
 
