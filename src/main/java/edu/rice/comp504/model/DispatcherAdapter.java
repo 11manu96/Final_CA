@@ -45,6 +45,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Allocate a user id for a new session.
+     *
      * @param session the new session
      */
     public void newSession(Session session) {
@@ -53,6 +54,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Get the user if from a session.
+     *
      * @param session the session
      * @return the user id binding with session
      */
@@ -62,6 +64,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Determine whether the session exists.
+     *
      * @param session the session
      * @return whether the session is still connected or not
      */
@@ -71,18 +74,37 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Load a user into the environment.
+     *
      * @param session the session that requests to called the method
-     * @param body of format "name age location school"
+     * @param body    of format "name age location school"
      * @return the new user that has been loaded
      */
     public User loadUser(Session session, String body) {
-        return null;
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        String name = jo.get("name").getAsString();
+        int age = jo.get("age").getAsInt();
+        String location = jo.get("location").getAsString();
+        String school = jo.get("school").getAsString();
+        User newUser = new User(nextUserId, session, name, age, location, school, null);
+        for (int i = 0; i < rooms.size(); i++) {
+            if (rooms.get(i).applyFilter(newUser)) {
+                newUser.addRoom(rooms.get(i));
+            }
+        }
+        addObserver(newUser);
+        userIdFromSession.put(session, nextUserId);
+        users.put(nextUserId, newUser);
+        NewUserResponse newUserResponse = new NewUserResponse("NewUser", nextUserId, name);
+        notifyClient(newUser, newUserResponse);
+        nextUserId++;
+        return newUser;
     }
 
     /**
      * Load a room into the environment.
+     *
      * @param session the session that requests to called the method
-     * @param body of format "name ageLower ageUpper {[location],}*{[location]} {[school],}*{[school]}"
+     * @param body    of format "name ageLower ageUpper {[location],}*{[location]} {[school],}*{[school]}"
      * @return the new room that has been loaded
      */
     public ChatRoom loadRoom(Session session, String body) {
@@ -120,6 +142,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Remove a user with given userId from the environment.
+     *
      * @param userId the id of the user to be removed
      */
     public void unloadUser(int userId) {
@@ -128,6 +151,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Remove a room with given roomId from the environment.
+     *
      * @param roomId the id of the chat room to be removed
      */
     public void unloadRoom(int roomId) {
@@ -136,8 +160,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Make a user join a chat room.
+     *
      * @param session the session that requests to called the method
-     * @param body of format "roomId"
+     * @param body    of format "roomId"
      */
     public void joinRoom(Session session, String body) {
 
@@ -145,8 +170,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Make a user volunteer to leave a chat room.
+     *
      * @param session the session that requests to called the method
-     * @param body of format "roomId"
+     * @param body    of format "roomId"
      */
     public void leaveRoom(Session session, String body) {
 
@@ -154,8 +180,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Make modification on chat room filer by the owner.
+     *
      * @param session the session of the chat room owner
-     * @param body of format "roomId lower upper {[location],}*{[location]} {[school],}*{[school]}"
+     * @param body    of format "roomId lower upper {[location],}*{[location]} {[school],}*{[school]}"
      */
     public void modifyRoom(Session session, String body) {
 
@@ -163,8 +190,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * A sender sends a string message to a receiver.
+     *
      * @param session the session of the message sender
-     * @param body of format "roomId receiverId rawMessage"
+     * @param body    of format "roomId receiverId rawMessage"
      */
     public void sendMessage(Session session, String body) {
         //parse the body
@@ -184,7 +212,7 @@ public class DispatcherAdapter extends Observable {
         Map<Integer, String> receivers = new HashMap<>();
 
         if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
-                receivers = chatRoom.getUsers();
+            receivers = chatRoom.getUsers();
 
         } else {
             int receiverId = jo.get("receiverId").getAsInt();
@@ -221,8 +249,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Acknowledge the message from the receiver.
+     *
      * @param session the session of the message receiver
-     * @param body of format "msgId"
+     * @param body    of format "msgId"
      */
     public void ackMessage(Session session, String body) {
 
@@ -230,8 +259,9 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Send query result from controller to front end.
+     *
      * @param session the session that requests to called the method
-     * @param body of format "type roomId [senderId] [receiverId]"
+     * @param body    of format "type roomId [senderId] [receiverId]"
      */
     public void query(Session session, String body) {
 
@@ -239,7 +269,8 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Notify the client for refreshing.
-     * @param user user expected to receive the notification
+     *
+     * @param user     user expected to receive the notification
      * @param response the information for notifying
      */
     public static void notifyClient(User user, AResponse response) {
@@ -251,7 +282,8 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Notify session about the message.
-     * @param session the session to notify
+     *
+     * @param session  the session to notify
      * @param response the notification information
      */
     public static void notifyClient(Session session, AResponse response) {
@@ -261,10 +293,11 @@ public class DispatcherAdapter extends Observable {
             e.printStackTrace();
         }
     }
-    
+
 
     /**
      * Get the names of all chat room members.
+     *
      * @param roomId the id of the chat room
      * @return all chat room members, mapping from user id to user name
      */
@@ -274,6 +307,7 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Get notifications in the chat room.
+     *
      * @param roomId the id of the chat room
      * @return notifications of the chat room
      */
@@ -283,7 +317,8 @@ public class DispatcherAdapter extends Observable {
 
     /**
      * Get chat history between user A and user B (commutative).
-     * @param roomId the id of the chat room
+     *
+     * @param roomId  the id of the chat room
      * @param userAId the id of user A
      * @param userBId the id of user B
      * @return chat history between user A and user B at a chat room
