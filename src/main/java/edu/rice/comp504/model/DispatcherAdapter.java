@@ -155,11 +155,11 @@ public class DispatcherAdapter extends Observable {
         User owner = chatRoom.getOwner();
         Map<Integer, String> receivers = new HashMap<>();
 
-        if (sender == owner) {//admin check
-            receivers = chatRoom.getUsers();
+        if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
+                receivers = chatRoom.getUsers();
 
         } else {
-            int receiverId = jo.get("reveiverId").getAsInt();
+            int receiverId = jo.get("receiverId").getAsInt();
             receivers.put(receiverId, users.get(receiverId).getName());
         }
 
@@ -169,6 +169,9 @@ public class DispatcherAdapter extends Observable {
             //get the receiver
             int receiverId = entry.getKey();
             User receiver = users.get(receiverId);
+
+            if (receiver == sender)//when the owner sends to all users, won't send to himself
+                continue;
 
             //construct the message
             Message message = new Message(nextMessageId, roomId, senderId, receiverId, rawMessage);
