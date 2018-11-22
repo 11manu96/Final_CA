@@ -230,20 +230,7 @@ public class DispatcherAdapter extends Observable {
             e.printStackTrace();
         }
     }
-
-
-    /**
-     * Notify session about the message.
-     * @param session the session to notify
-     * @param response the notification information
-     */
-    public static void notifyClient(Session session, AResponse response) {
-        try {
-            session.getRemote().sendString(String.valueOf(response.toJson()));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+    
 
     /**
      * Get the names of all chat room members.
