@@ -29,7 +29,6 @@ public class DispatcherAdapter extends Observable {
 
     // Maps session to user id
     private Map<Session, Integer> userIdFromSession;
-    private String location;
 
     /**
      * Constructor, initializing all private fields.
@@ -86,18 +85,12 @@ public class DispatcherAdapter extends Observable {
         int age = jo.get("age").getAsInt();
         String location = jo.get("location").getAsString();
         String school = jo.get("school").getAsString();
-        User testUser = new User(nextUserId, session, name, age, location, school, null);
-        List<ChatRoom> validRooms = new ArrayList<>();
+        User newUser = new User(nextUserId, session, name, age, location, school, null);
         for (int i = 0; i < rooms.size(); i++) {
-            if (rooms.get(i).applyFilter(testUser)) {
-                validRooms.add(rooms.get(i));
+            if (rooms.get(i).applyFilter(newUser)) {
+                newUser.addRoom(rooms.get(i));
             }
         }
-        ChatRoom[] room = new ChatRoom[validRooms.size()];
-        for (int i = 0; i < validRooms.size(); i++) {
-            room[i] = validRooms.get(i);
-        }
-        User newUser = new User(nextUserId, session, name, age, location, school, room);
         addObserver(newUser);
         userIdFromSession.put(session, nextUserId);
         users.put(nextUserId, newUser);
