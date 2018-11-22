@@ -38,10 +38,10 @@ public class DispatcherAdapter extends Observable {
         this.nextRoomId = 0;
         this.nextUserId = 0;
         this.nextMessageId = 0;
-        this.users = new ConcurrentHashMap<>();
-        this.rooms = new ConcurrentHashMap<>();
-        this.messages = new ConcurrentHashMap<>();
-        this.userIdFromSession = new ConcurrentHashMap<>();
+        this.users = new ConcurrentHashMap();
+        this.rooms = new ConcurrentHashMap();
+        this.messages = new ConcurrentHashMap();
+        this.userIdFromSession = new ConcurrentHashMap();
     }
 
     /**
@@ -211,10 +211,24 @@ public class DispatcherAdapter extends Observable {
      * @param user user expected to receive the notification
      * @param response the information for notifying
      */
-    public void notifyClient(User user, AResponse response) {
+    public static void notifyClient(User user, AResponse response) {
 
-        ChatAppController.notify(user.getSession(), response);
+        notifyClient(user.getSession(), response);
 
+    }
+
+
+    /**
+     * Notify session about the message.
+     * @param session the session to notify
+     * @param response the notification information
+     */
+    public static void notifyClient(Session session, AResponse response) {
+        try {
+            session.getRemote().sendString(String.valueOf(response.toJson()));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
