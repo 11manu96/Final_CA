@@ -4,36 +4,20 @@ import com.sun.org.apache.bcel.internal.generic.RETURN;
 import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
 
-public class JoinRoomCmd implements IUserCmd{
+public class JoinRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
-    private static JoinRoomCmd instance;
 
     /**
      * Constructor.
      * @param chatRoom chatRoom
      * @param user user
      */
-    private JoinRoomCmd(ChatRoom chatRoom, User user){
+    public JoinRoomCmd(ChatRoom chatRoom, User user) {
         this.chatRoom = chatRoom;
         this.user = user;
     }
 
-    /**
-     * Return to a JoinRoomCmd instance.
-     * @param chatRoom chatRoom
-     * @param user user
-     * @return a JoinRoomCmd
-     */
-    public static JoinRoomCmd makeCmd(ChatRoom chatRoom, User user){
-        if (instance == null){
-            instance = new JoinRoomCmd(chatRoom, user);
-        } else {
-            instance.setChatRoom(chatRoom);
-            instance.setUser(user);
-        }
-        return instance;
-    }
 
     /**
      * Helper function get user.
