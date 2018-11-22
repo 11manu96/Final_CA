@@ -48,6 +48,8 @@ public class WebSocketController {
             case "send":
                 dis.sendMessage(user, message);
                 break;
+            case "leave":
+                dis.leaveRoom(user, message);
             default:
                 break;
         }
