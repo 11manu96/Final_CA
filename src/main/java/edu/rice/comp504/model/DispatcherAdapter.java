@@ -135,6 +135,9 @@ public class DispatcherAdapter extends Observable {
             NewRoomResponse newRoomResponse = new NewRoomResponse("NewRoom", nextRoomId, roomName, ownerId);
             // notify the owner
             notifyClient(owner, newRoomResponse);
+
+
+
             // increase nextRoomId
             nextRoomId++;
             return newRoom;
@@ -203,7 +206,7 @@ public class DispatcherAdapter extends Observable {
      */
     public void leaveRoom(Session session, String body) {
         //parsebody
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject(body);
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
 
         //get room
         int roomId = jo.get("roomId").getAsInt();

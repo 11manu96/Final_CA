@@ -1,6 +1,8 @@
-'use strict';
+"use strict";
 
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
+var loggedIn = false;
+var currentRoom = null;
 
 /**
  * Entry point into chat room
@@ -29,8 +31,10 @@ function logIn() {
     var userAge = $("#user-age").val();
     var userLocation = $("#user-location").val();
     var userSchool = $("#user-school").val();
-    webSocket.send(JSON.stringify({'type': 'login', 'body':
-            {'name': userName, 'age': userAge, 'location': userLocation, 'school': userSchool}}));
+    webSocket.send(JSON.stringify({"type": "login", "body":
+            {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
+
+    $(".btn-logged-in").prop("disabled", false);
 }
 
 /**
@@ -38,6 +42,7 @@ function logIn() {
  */
 function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val();
+    currentRoom = selectedRoom;
 }
 
 /**
@@ -45,6 +50,7 @@ function enterRoom() {
  */
 function exitRoom() {
     var selectedRoom = $("#slt-joined-rooms").val();
+    webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
 }
 
 /**
@@ -59,6 +65,7 @@ function exitAllRooms() {
  */
 function joinRoom() {
     var selectedRoom = $("#slt-available-rooms").val();
+    webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
 }
 
 /**
@@ -70,6 +77,9 @@ function createRoom() {
     var roomMaxAge = $("#room-max-age").val();
     var roomLocations = $("#slt-room-location").val();
     var roomSchools = $("#slt-room-school").val();
+    webSocket.send(JSON.stringify({"type": "create", "body":
+            {"roomName": roomName, "ageLower": roomMinAge, "ageUpper": roomMaxAge,
+                "location": roomLocations, "school": roomSchools}}));
 }
 
 /**
@@ -85,6 +95,8 @@ function loadMessages() {
 function sendMessage() {
     var user = $("#slt-room-users").val();
     var message = $("#chat-message").val();
+    webSocket.send(JSON.stringify({"type": "send", "body":
+            {"roomId": userName, "message": message, "receiverId": user}}));
 }
 
 /**
@@ -92,6 +104,8 @@ function sendMessage() {
  */
 function sendAll() {
     var message = $("#chat-message").val();
+    webSocket.send(JSON.stringify({"type": "send", "body":
+            {"roomId": userName, "message": message, "receiverId": "All"}}));
 }
 
 /**
