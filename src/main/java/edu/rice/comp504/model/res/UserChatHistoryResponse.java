@@ -11,8 +11,8 @@ public class UserChatHistoryResponse extends AResponse {
      * Constructor.
      * @param type the type of the response, i.e. the name of class
      */
-    public UserChatHistoryResponse(String type, List<Message> chatHistory) {
-        super(type);
+    public UserChatHistoryResponse(List<Message> chatHistory) {
+        super("UserChatHistoryResponse");
         this.chatHistory = chatHistory;
     }
 

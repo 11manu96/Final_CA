@@ -136,7 +136,7 @@ public class DispatcherAdapter extends Observable {
             // notify the owner
             notifyClient(owner, newRoomResponse);
 
-
+            UserRoomResponse userRoomResponse = new UserRoomResponse("UserRoomResponse")
 
             // increase nextRoomId
             nextRoomId++;

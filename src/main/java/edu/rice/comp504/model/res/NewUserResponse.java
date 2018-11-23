@@ -4,8 +4,8 @@ public class NewUserResponse extends AResponse {
     private int userID;
     private String userName;
 
-    public NewUserResponse(String type, int userID, String userName) {
-        super(type);
+    public NewUserResponse(int userID, String userName) {
+        super("NewUserResponse");
         this.userID = userID;
         this.userName = userName;
     }
