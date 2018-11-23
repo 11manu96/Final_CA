@@ -159,9 +159,7 @@ public class DispatcherAdapter extends Observable {
             ChatRoom chatRoom = rooms.get(roomId);
 
             //leave room
-            setChanged();
-            notifyObservers(new LeaveRoomCmd(chatRoom, user, reason));
-            clearChanged();
+            chatRoom.removeUser(user, reason);
 
             //notification response
             RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
@@ -229,9 +227,7 @@ public class DispatcherAdapter extends Observable {
         String reason = jo.get("reason").getAsString();
 
         //leave room
-        setChanged();
-        notifyObservers(new LeaveRoomCmd(chatRoom, user, reason));
-        clearChanged();
+        chatRoom.removeUser(user, reason);
 
         //notification response
         RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
