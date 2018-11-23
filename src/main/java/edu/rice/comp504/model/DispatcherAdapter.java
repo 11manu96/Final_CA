@@ -150,7 +150,21 @@ public class DispatcherAdapter extends Observable {
      * @param userId the id of the user to be removed
      */
     public void unloadUser(int userId) {
+        User user = users.get(userId);
+        List<Integer> joinedRoomIds = user.getJoinedRoomIds();
+        for (int i = 0; i < joinedRoomIds.size(); i++) {
+            int roomId = joinedRoomIds.get(i);
 
+            JsonObject body = new JsonObject();
+            body.addProperty("roomId", roomId);
+            body.addProperty("reason", user.getName() + "closes the session.");
+
+            JsonObject jo = new JsonObject();
+            jo.addProperty("type", "leave");
+            jo.add("body", body);
+
+            leaveRoom(user.getSession(), jo.toString());
+        }
     }
 
     /**
@@ -193,18 +207,22 @@ public class DispatcherAdapter extends Observable {
      */
     public void leaveRoom(Session session, String body) {
         //parsebody
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject(body);
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
 
         //get room
         int roomId = jo.get("roomId").getAsInt();
         ChatRoom chatRoom = this.rooms.get(roomId);
 
-        //getuser
+        //get user
         User user = this.users.get(userIdFromSession.get(session));
+
+        //get reason
+        String reason = jo.get("reason").getAsString();
 
         //leave room
         setChanged();
-        notifyObservers(new LeaveRoomCmd(chatRoom, user));
+        notifyObservers(new LeaveRoomCmd(chatRoom, user, reason));
+        clearChanged();
 
         //notification response
         RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
