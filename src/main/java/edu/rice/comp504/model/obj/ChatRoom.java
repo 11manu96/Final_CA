@@ -1,6 +1,7 @@
 package edu.rice.comp504.model.obj;
 
 import edu.rice.comp504.model.DispatcherAdapter;
+import edu.rice.comp504.model.cmd.LeaveRoomCmd;
 
 import java.util.*;
 import java.util.Observable;
@@ -111,7 +112,7 @@ public class ChatRoom extends Observable {
      * Return users in the chat room
      */
     public Map<Integer, String> getUsers() {
-        return null;
+        return this.userNameFromUserId;
     }
 
     /**
@@ -153,7 +154,16 @@ public class ChatRoom extends Observable {
      * Delete user from observer list
      */
     public boolean removeUser(User user, String reason) {
-        return false;
+        int userid = user.getId();
+        Map<Integer,String> users = this.getUsers();
+        if (users.containsKey(userid)) {
+            users.remove(user.getId());
+            notifications.add(reason);
+            deleteObserver(user);
+            return true;
+        }  else {
+            return false;
+        }
     }
 
     /**
