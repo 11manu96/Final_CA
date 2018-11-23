@@ -169,30 +169,44 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "roomId"
      */
     public void joinRoom(Session session, String body) {
-        // get room
         JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
         int roomId = jo.get("roomId").getAsInt();
-        ChatRoom chatRoom = this.rooms.get(roomId);
 
-        // get user
+        ChatRoom chatRoom = this.rooms.get(roomId);
         int userId = getUserIdFromSession(session);
         User user = this.users.get(userId);
 
-        // join room
-        setChanged();
-        notifyObservers(new JoinRoomCmd(chatRoom, user));
+        boolean userValid = chatRoom.applyFilter(user);
+        if (userValid) {
+            JoinRoomCmd joinRoomCmd = new JoinRoomCmd(chatRoom, user);
+            joinRoomCmd.execute(user);
 
-        //notification response
-        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
-        notifyClient(user, roomNotificationResponse);
 
-        //userrooomlist response
-        UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
-        notifyClient(user, userRoomResponse);
+            //userrooomlist response
+            UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+            notifyClient(user, userRoomResponse);
 
-        //roomuserlist response
-        RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
-        notifyClient(user, roomUsersResponse);
+            Map<Integer, String> notifyUsers = chatRoom.getUsers();
+
+            //notification response
+            RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+            //roomuserlist response
+            RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+
+            Iterator it = notifyUsers.entrySet().iterator();
+
+            while (it.hasNext()) {
+                Map.Entry pair = (Map.Entry)it.next();
+                User tempUser = users.get(pair.getKey());
+                notifyClient(tempUser, roomUsersResponse);
+                notifyClient(tempUser, roomNotificationResponse);
+            }
+
+
+
+        } else {
+            //TODO notify the user is not valid.
+        }
     }
 
     /**
@@ -216,17 +230,27 @@ public class DispatcherAdapter extends Observable {
         setChanged();
         notifyObservers(new LeaveRoomCmd(chatRoom, user));
 
-        //notification response
-        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
-        notifyClient(user, roomNotificationResponse);
-
         //userrooomlist response
         UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
         notifyClient(user, userRoomResponse);
 
+        Map<Integer, String> notifyUsers = chatRoom.getUsers();
+
+        //notification response
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
         //roomuserlist response
         RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
-        notifyClient(user, roomUsersResponse);
+
+        Iterator it = notifyUsers.entrySet().iterator();
+
+        while (it.hasNext()) {
+            Map.Entry pair = (Map.Entry)it.next();
+            User tempUser = users.get(pair.getKey());
+            notifyClient(tempUser, roomUsersResponse);
+            notifyClient(tempUser, roomNotificationResponse);
+        }
+
+
 
     }
 
@@ -354,7 +378,7 @@ public class DispatcherAdapter extends Observable {
      * @return all chat room members, mapping from user id to user name
      */
     private Map<Integer, String> getUsers(int roomId) {
-        return null;
+        return rooms.get(roomId).getUsers();
     }
 
     /**
