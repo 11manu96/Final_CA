@@ -1,7 +1,8 @@
 package edu.rice.comp504.controller;
 
-import edu.rice.comp504.model.res.AResponse;
 import edu.rice.comp504.model.DispatcherAdapter;
+
+import static spark.Spark.*;
 
 /**
  * The chat app controller communicates with all the clients on the web socket.
@@ -23,7 +24,11 @@ public class ChatAppController {
      * @param args The command line arguments
      */
     public static void main(String[] args) {
+        port(getHerokuAssignedPort());
+        staticFiles.location("/public");
 
+        webSocket("/chatapp", WebSocketController.class);
+        init();
     }
 
     /**
@@ -31,6 +36,10 @@ public class ChatAppController {
      * @return The heroku assigned port number
      */
     private static int getHerokuAssignedPort() {
-        return 4567;
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get("PORT") != null) {
+            return Integer.parseInt(processBuilder.environment().get("PORT"));
+        }
+        return 4567; // return default port if heroku-port isn't set.
     }
 }
