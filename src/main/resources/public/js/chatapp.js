@@ -115,15 +115,16 @@ function sendAll() {
 function updateChatApp(message) {
     // parse message to determine how to update view
     var responseBody = JSON.parse(message.data);
+    console.log(responseBody);
     if (responseBody.type === "UserRoomResponse") {
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
         // need to get room name somehow
         responseBody.joinedRoomIds.forEach(function(roomId) {
-            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomId));
+            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         });
         responseBody.availableRoomIds.forEach(function(roomId) {
-            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomId));
+            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         })
     }
 }

@@ -3,8 +3,7 @@ package edu.rice.comp504.model;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import com.google.gson.*;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -119,8 +118,15 @@ public class DispatcherAdapter extends Observable {
         String roomName = jo.get("roomName").getAsString();
         int ageLower = jo.get("ageLower").getAsInt();
         int ageUpper = jo.get("ageUpper").getAsInt();
-        String[] locations = jo.get("location").getAsString().split(",");
-        String[] schools = jo.get("school").getAsString().split(",");
+        String[] locations = new String[((JsonArray) jo.get("location")).size()];
+        String[] schools = new String[((JsonArray) jo.get("school")).size()];
+        for (int i = 0; i < ((JsonArray) jo.get("location")).size(); i++) {
+            locations[i] = ((JsonArray) jo.get("location")).get(i).getAsString();
+        }
+        for (int i = 0; i < ((JsonArray) jo.get("school")).size(); i++) {
+            schools[i] = ((JsonArray) jo.get("school")).get(i).getAsString();
+        }
+
         // get owner
         int ownerId = getUserIdFromSession(session);
         User owner = this.users.get(ownerId);
@@ -138,7 +144,8 @@ public class DispatcherAdapter extends Observable {
             // notify the owner
             notifyClient(owner, newRoomResponse);
 
-
+            UserRoomResponse userRoomResponse = new UserRoomResponse(ownerId, owner.getJoinedRoomIds(), owner.getAvailableRoomIds());
+            notifyClient(owner, userRoomResponse);
             // increase nextRoomId
             nextRoomId++;
             return newRoom;
