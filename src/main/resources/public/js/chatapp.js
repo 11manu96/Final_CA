@@ -6,15 +6,15 @@ const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.por
  * Entry point into chat room
  */
 window.onload = function() {
-    $("#btn-login").onclick(logIn);
-    $("#btn-enter").onclick(enterRoom);
-    $("#btn-exit").onclick(exitRoom);
-    $("#btn-exit-all").onclick(exitAllRooms);
-    $("#btn-join").onclick(joinRoom);
-    $("#btn-create").onclick(createRoom);
-    $(".opt-room-user").onclick(loadMessages);
-    $("#btn-send").onclick(sendMessage);
-    $("#btn-send-all").onclick(sendAll);
+    $("#btn-login").click(logIn);
+    $("#btn-enter").click(enterRoom);
+    $("#btn-exit").click(exitRoom);
+    $("#btn-exit-all").click(exitAllRooms);
+    $("#btn-join").click(joinRoom);
+    $("#btn-create").click(createRoom);
+    $(".opt-room-user").click(loadMessages);
+    $("#btn-send").click(sendMessage);
+    $("#btn-send-all").click(sendAll);
 
     webSocket.onmessage = function(message) {
         updateChatApp(message);
@@ -29,6 +29,8 @@ function logIn() {
     var userAge = $("#user-age").val();
     var userLocation = $("#user-location").val();
     var userSchool = $("#user-school").val();
+    webSocket.send(JSON.stringify({'type': 'login', 'body':
+            {'name': userName, 'age': userAge, 'location': userLocation, 'school': userSchool}}));
 }
 
 /**
