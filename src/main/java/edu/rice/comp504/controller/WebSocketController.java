@@ -65,6 +65,10 @@ public class WebSocketController {
      */
     @OnWebSocketClose
     public void onClose(Session user, int statusCode, String reason) {
+        DispatcherAdapter dis = ChatAppController.getDispatcher();
+
+        int userId = dis.getUserIdFromSession(user);
+        dis.unloadUser(userId);
 
     }
 
