@@ -98,8 +98,10 @@ public class DispatcherAdapter extends Observable {
         addObserver(newUser);
         userIdFromSession.put(session, nextUserId);
         users.put(nextUserId, newUser);
-        NewUserResponse newUserResponse = new NewUserResponse("NewUser", nextUserId, name);
+        NewUserResponse newUserResponse = new NewUserResponse(nextUserId, name);
         notifyClient(newUser, newUserResponse);
+        UserRoomResponse userRoomResponse = new UserRoomResponse(nextUserId, newUser.getJoinedRoomIds(), newUser.getAvailableRoomIds());
+        notifyClient(newUser, userRoomResponse);
         nextUserId++;
         return newUser;
     }
@@ -132,11 +134,10 @@ public class DispatcherAdapter extends Observable {
             owner.moveToJoined(newRoom);
             this.rooms.put(nextRoomId, newRoom);
             // create response
-            NewRoomResponse newRoomResponse = new NewRoomResponse("NewRoom", nextRoomId, roomName, ownerId);
+            NewRoomResponse newRoomResponse = new NewRoomResponse(nextRoomId, roomName, ownerId);
             // notify the owner
             notifyClient(owner, newRoomResponse);
 
-            UserRoomResponse userRoomResponse = new UserRoomResponse("UserRoomResponse")
 
             // increase nextRoomId
             nextRoomId++;
@@ -186,15 +187,15 @@ public class DispatcherAdapter extends Observable {
         notifyObservers(new JoinRoomCmd(chatRoom, user));
 
         //notification response
-        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
         notifyClient(user, roomNotificationResponse);
 
         //userrooomlist response
-        UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+        UserRoomResponse userRoomResponse = new UserRoomResponse(userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
         notifyClient(user, userRoomResponse);
 
         //roomuserlist response
-        RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
         notifyClient(user, roomUsersResponse);
     }
 
@@ -220,15 +221,15 @@ public class DispatcherAdapter extends Observable {
         notifyObservers(new LeaveRoomCmd(chatRoom, user));
 
         //notification response
-        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
         notifyClient(user, roomNotificationResponse);
 
         //userrooomlist response
-        UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+        UserRoomResponse userRoomResponse = new UserRoomResponse(userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
         notifyClient(user, userRoomResponse);
 
         //roomuserlist response
-        RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
         notifyClient(user, roomUsersResponse);
 
     }
@@ -296,7 +297,7 @@ public class DispatcherAdapter extends Observable {
             chatHistory.add(message);
 
             //response
-            UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse("DispatcherAdatpter", chatHistory);
+            UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse(chatHistory);
             notifyClient(receiver, userChatHistoryResponse);
 
         }
