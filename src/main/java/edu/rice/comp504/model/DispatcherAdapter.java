@@ -195,12 +195,11 @@ public class DispatcherAdapter extends Observable {
 
             Iterator it = notifyUsers.entrySet().iterator();
 
-            while(it.hasNext()){
+            while (it.hasNext()) {
                 Map.Entry pair = (Map.Entry)it.next();
                 User tempUser = users.get(pair.getKey());
-                if(tempUser != null)
-                    notifyClient(tempUser, roomUsersResponse);
-                    notifyClient(tempUser, roomNotificationResponse);
+                notifyClient(tempUser, roomUsersResponse);
+                notifyClient(tempUser, roomNotificationResponse);
             }
 
 
@@ -244,12 +243,11 @@ public class DispatcherAdapter extends Observable {
 
         Iterator it = notifyUsers.entrySet().iterator();
 
-        while(it.hasNext()){
+        while (it.hasNext()) {
             Map.Entry pair = (Map.Entry)it.next();
             User tempUser = users.get(pair.getKey());
-            if(tempUser != null)
-                notifyClient(tempUser, roomUsersResponse);
-                notifyClient(tempUser, roomNotificationResponse);
+            notifyClient(tempUser, roomUsersResponse);
+            notifyClient(tempUser, roomNotificationResponse);
         }
 
 
