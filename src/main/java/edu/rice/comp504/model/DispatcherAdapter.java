@@ -151,20 +151,29 @@ public class DispatcherAdapter extends Observable {
      */
     public void unloadUser(int userId) {
         User user = users.get(userId);
+        String reason = user.getName() + "closes the session.";
+
         List<Integer> joinedRoomIds = user.getJoinedRoomIds();
         for (int i = 0; i < joinedRoomIds.size(); i++) {
             int roomId = joinedRoomIds.get(i);
+            ChatRoom chatRoom = rooms.get(roomId);
 
-            JsonObject body = new JsonObject();
-            body.addProperty("roomId", roomId);
-            body.addProperty("reason", user.getName() + "closes the session.");
+            //leave room
+            setChanged();
+            notifyObservers(new LeaveRoomCmd(chatRoom, user, reason));
+            clearChanged();
 
-            JsonObject jo = new JsonObject();
-            jo.addProperty("type", "leave");
-            jo.add("body", body);
+            //notification response
+            RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+            notifyClient(user, roomNotificationResponse);
 
-            leaveRoom(user.getSession(), jo.toString());
+            //roomuserlist response
+            RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+            notifyClient(user, roomUsersResponse);
+
         }
+
+        users.remove(userId);
     }
 
     /**
