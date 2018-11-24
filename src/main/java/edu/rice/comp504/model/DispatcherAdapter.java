@@ -246,7 +246,7 @@ public class DispatcherAdapter extends Observable {
             if (user.getId() == chatRoom.getOwner().getId()) {
                 unloadRoom(chatRoom.getId());
             }
-            
+
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());
