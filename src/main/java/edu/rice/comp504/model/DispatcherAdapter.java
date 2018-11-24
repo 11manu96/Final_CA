@@ -138,6 +138,7 @@ public class DispatcherAdapter extends Observable {
         }
 
         // get owner
+
         int ownerId = getUserIdFromSession(session);
         User owner = this.users.get(ownerId);
 
@@ -147,6 +148,11 @@ public class DispatcherAdapter extends Observable {
 
         // check if the owner is eligible to join the room
         if (newRoom.applyFilter(owner)) {
+            //adding owner to chatroom
+            Map<Integer, String> map = newRoom.getUsers();
+            map.put(owner.getId(), owner.getName());
+            newRoom.setUsers(map);
+
             // add room to all rooms list
             this.rooms.put(newRoom.getId(), newRoom);
 
