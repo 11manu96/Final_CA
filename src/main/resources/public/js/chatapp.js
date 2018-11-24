@@ -16,7 +16,7 @@ window.onload = function() {
     $("#btn-exit-all").click(exitAllRooms);
     $("#btn-join").click(joinRoom);
     $("#btn-create").click(createRoom);
-    $(".opt-room-user").click(loadMessages);
+    $("#slt-room-users").click(loadMessages);
     $("#btn-send").click(sendMessage);
     $("#btn-send-all").click(sendAll);
 
@@ -88,7 +88,10 @@ function createRoom() {
  * Send request to websocket to retrieve message history
  */
 function loadMessages() {
-    var user = $("#slt-room-users").val();
+    var user = $("#slt-room-users").val()[0];
+    console.log(user);
+    webSocket.send(JSON.stringify({"type": "query", "body":
+            {"query": "userChatHistory", "roomId": currentRoom, "otherUserId": user}}));
 }
 
 /**
@@ -136,7 +139,7 @@ function updateChatApp(message) {
         $("#slt-room-users").empty();
         var userList = responseBody.users;
         Object.keys(userList).map(function (key) {
-            $("#slt-room-users").append($("<option class='opt-room-user'></option>").attr("value", Number(key)).text(userList[key]));
+            $("#slt-room-users").append($("<option></option>").attr("value", Number(key)).text(userList[key]));
             roomUsers[key] = userList[key];
         });
         $("#room-title").text(roomNames[responseBody.roomId].name);
