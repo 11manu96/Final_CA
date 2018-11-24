@@ -9,7 +9,6 @@ public class UserChatHistoryResponse extends AResponse {
 
     /**
      * Constructor.
-     * @param type the type of the response, i.e. the name of class
      */
     public UserChatHistoryResponse(List<Message> chatHistory) {
         super("UserChatHistoryResponse");
