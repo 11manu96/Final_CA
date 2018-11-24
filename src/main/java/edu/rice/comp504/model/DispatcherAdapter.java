@@ -52,8 +52,8 @@ public class DispatcherAdapter extends Observable {
      * @param session the new session
      */
     public void newSession(Session session) {
-        userIdFromSession.put(session, nextUserId);
-        nextUserId++;
+        userIdFromSession.put(session, this.nextUserId);
+        this.nextUserId++;
     }
 
     /**
@@ -111,7 +111,7 @@ public class DispatcherAdapter extends Observable {
             addObserver(newUser);
 
             // send responses to new user
-            notifyClient(session, new NewUserResponse(newUser.getId(), name));
+            notifyClient(session, new NewUserResponse(newUser.getId(), newUser.getName()));
             notifyClient(session, new UserRoomResponse(newUser.getId(), newUser.getJoinedRoomIds(),
                     newUser.getAvailableRoomIds()));
 
