@@ -30,7 +30,7 @@ public class AddRoomCmd implements IUserCmd {
         if (this.chatRoom.applyFilter(context)) {
             context.addRoom(this.chatRoom);
             if (context == chatRoom.getOwner()) {
-                context.moveToJoined(this.chatRoom);
+                chatRoom.addUser(context);
             }
             DispatcherAdapter.notifyClient(context, new UserRoomResponse(context.getId(),
                     context.getJoinedRoomIds(), context.getAvailableRoomIds()));
