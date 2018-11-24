@@ -15,9 +15,25 @@
         </div>
         <div class="center-box">
             Name: <input id="user-name" class="not-logged-in" type="text" placeholder="Enter your name">
-            Age: <input id="user-age" class="not-logged-in" type="text" placeholder="Enter your age">
-            Location: <input id="user-location" class="not-logged-in" type="text" placeholder="Enter your location">
-            School: <input id="user-school" class="not-logged-in" type="text" placeholder="Enter your school">
+            Age: <input id="user-age" class="not-logged-in" type="number" min="0" max="100">
+            Location:
+            <select id="user-location" class="not-logged-in">
+                <option value="North America">North America</option>
+                <option value="South America">South America</option>
+                <option value="Europe">Europe</option>
+                <option value="Africa">Africa</option>
+                <option value="Asia">Asia</option>
+                <option value="Australia">Australia</option>
+                <option value="Antarctica">Antarctica</option>
+            </select>
+            School:
+            <select id="user-school" class="not-logged-in">
+                <option value="Rice">Rice</option>
+                <option value="Harvard">Harvard</option>
+                <option value="Duke">Duke</option>
+                <option value="Nanjing">Nanjing</option>
+                <option value="Wuhan">Wuhan</option>
+            </select>
             <button id="btn-login" class="not-logged-in">Login</button>
         </div>
     </div>

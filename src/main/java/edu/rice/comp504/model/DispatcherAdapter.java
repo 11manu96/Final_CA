@@ -83,36 +83,41 @@ public class DispatcherAdapter extends Observable {
      * @return the new user that has been loaded
      */
     public User loadUser(Session session, String body) {
-        // parse body
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        String name = jo.get("name").getAsString();
-        int age = jo.get("age").getAsInt();
-        String location = jo.get("location").getAsString();
-        String school = jo.get("school").getAsString();
+        try {
+            // parse body
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            String name = jo.get("name").getAsString();
+            int age = jo.get("age").getAsInt();
+            String location = jo.get("location").getAsString();
+            String school = jo.get("school").getAsString();
 
-        // create user
-        newSession(session);
-        User newUser = new User(getUserIdFromSession(session), session, name, age, location, school, null);
+            // create user
+            newSession(session);
+            User newUser = new User(getUserIdFromSession(session), session, name, age, location, school, null);
 
-        // check rooms available to user
-        for (ChatRoom room : rooms.values()) {
-            if (room.applyFilter(newUser)) {
-                newUser.addRoom(room);
+            // check rooms available to user
+            for (ChatRoom room : rooms.values()) {
+                if (room.applyFilter(newUser)) {
+                    newUser.addRoom(room);
+                }
             }
+
+            // add user object to lookup and observers
+            users.put(newUser.getId(), newUser);
+            addObserver(newUser);
+
+            // send responses to new user
+            NewUserResponse newUserResponse = new NewUserResponse(newUser.getId(), name);
+            notifyClient(newUser, newUserResponse);
+            UserRoomResponse userRoomResponse = new UserRoomResponse(newUser.getId(), newUser.getJoinedRoomIds(),
+                    newUser.getAvailableRoomIds());
+            notifyClient(newUser, userRoomResponse);
+
+            return newUser;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
         }
-
-        // add user object to lookup and observers
-        users.put(newUser.getId(), newUser);
-        addObserver(newUser);
-
-        // send responses to new user
-        NewUserResponse newUserResponse = new NewUserResponse(newUser.getId(), name);
-        notifyClient(newUser, newUserResponse);
-        UserRoomResponse userRoomResponse = new UserRoomResponse(newUser.getId(), newUser.getJoinedRoomIds(),
-                newUser.getAvailableRoomIds());
-        notifyClient(newUser, userRoomResponse);
-
-        return newUser;
     }
 
     /**
@@ -123,40 +128,45 @@ public class DispatcherAdapter extends Observable {
      * @return the new room that has been loaded
      */
     public ChatRoom loadRoom(Session session, String body) {
-        // parse body
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        String roomName = jo.get("roomName").getAsString();
-        int ageLower = jo.get("ageLower").getAsInt();
-        int ageUpper = jo.get("ageUpper").getAsInt();
-        String[] locations = new String[((JsonArray) jo.get("location")).size()];
-        String[] schools = new String[((JsonArray) jo.get("school")).size()];
-        for (int i = 0; i < ((JsonArray) jo.get("location")).size(); i++) {
-            locations[i] = ((JsonArray) jo.get("location")).get(i).getAsString();
-        }
-        for (int i = 0; i < ((JsonArray) jo.get("school")).size(); i++) {
-            schools[i] = ((JsonArray) jo.get("school")).get(i).getAsString();
-        }
+        try {
+            // parse body
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            String roomName = jo.get("roomName").getAsString();
+            int ageLower = jo.get("ageLower").getAsInt();
+            int ageUpper = jo.get("ageUpper").getAsInt();
+            String[] locations = new String[((JsonArray) jo.get("location")).size()];
+            String[] schools = new String[((JsonArray) jo.get("school")).size()];
+            for (int i = 0; i < ((JsonArray) jo.get("location")).size(); i++) {
+                locations[i] = ((JsonArray) jo.get("location")).get(i).getAsString();
+            }
+            for (int i = 0; i < ((JsonArray) jo.get("school")).size(); i++) {
+                schools[i] = ((JsonArray) jo.get("school")).get(i).getAsString();
+            }
 
-        // get owner
-        int ownerId = getUserIdFromSession(session);
-        User owner = this.users.get(ownerId);
+            // get owner
+            int ownerId = getUserIdFromSession(session);
+            User owner = this.users.get(ownerId);
 
-        // create chat room
-        ChatRoom newRoom = new ChatRoom(this.nextRoomId++, roomName, owner, ageLower, ageUpper,
-                locations, schools, this);
+            // create chat room
+            ChatRoom newRoom = new ChatRoom(this.nextRoomId++, roomName, owner, ageLower, ageUpper,
+                    locations, schools, this);
 
-        // check if the owner is eligible to join the room
-        if (newRoom.applyFilter(owner)) {
-            // add room to all rooms list
-            this.rooms.put(newRoom.getId(), newRoom);
+            // check if the owner is eligible to join the room
+            if (newRoom.applyFilter(owner)) {
+                // add room to all rooms list
+                this.rooms.put(newRoom.getId(), newRoom);
 
-            AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
-            setChanged();
-            notifyObservers(addRoomCmd);
+                AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
+                setChanged();
+                notifyObservers(addRoomCmd);
 
-            return newRoom;
-        } else {
-            // TODO: notify the owner he is invalid
+                return newRoom;
+            } else {
+                // TODO: notify the owner he is invalid
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
