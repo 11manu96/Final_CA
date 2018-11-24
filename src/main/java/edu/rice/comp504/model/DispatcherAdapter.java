@@ -148,12 +148,7 @@ public class DispatcherAdapter extends Observable {
 
         // check if the owner is eligible to join the room
         if (newRoom.applyFilter(owner)) {
-            //adding owner to chatroom
-            Map<Integer, String> map = newRoom.getUsers();
-            map.put(owner.getId(), owner.getName());
-            newRoom.setUsers(map);
-
-            // add room to all rooms listFl
+            // add room to all rooms list
             this.rooms.put(newRoom.getId(), newRoom);
 
             AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
@@ -162,7 +157,7 @@ public class DispatcherAdapter extends Observable {
 
             return newRoom;
         } else {
-            // TODO: notify the owner he is invaKlid
+            // TODO: notify the owner he is invalid
             return null;
         }
     }
