@@ -212,12 +212,18 @@ public class DispatcherAdapter extends Observable {
         // parse body
         JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
         User user = this.users.get(userIdFromSession.get(session));
-        try {
+        String rawmessage = jo.get("roomId").getAsString();
+        int index = rawmessage.indexOf("all");
+        boolean isint= true;
+        if (index >= 0) {
+            isint = false;
+        }
+        if (isint) {
             int roomId = jo.get("roomId").getAsInt();
             ChatRoom chatRoom = this.rooms.get(roomId);
             chatRoom.removeUser(user, user.getName() + " left the room.");
         }
-        catch (ClassCastException e) {
+        else {
             // string "all", leave all rooms
             for (int roomid : user.getJoinedRoomIds()) {
                 ChatRoom chatRoom = this.rooms.get(roomid);
