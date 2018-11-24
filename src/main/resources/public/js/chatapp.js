@@ -160,5 +160,7 @@ function updateChatApp(message) {
             $("#chat-dialog").append($("<ul></ul>").text(
                 roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
         });
+    } else if (responseBody.type === "RoomNotifications") {
+        $("#room-notification").text(responseBody.notifications[responseBody.notifications.length - 1]);
     }
 }

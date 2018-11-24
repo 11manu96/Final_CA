@@ -237,11 +237,18 @@ public class DispatcherAdapter extends Observable {
         try {
             // parse body
             JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-            int roomId = jo.get("roomId").getAsInt();
 
-            ChatRoom chatRoom = this.rooms.get(roomId);
             User user = this.users.get(userIdFromSession.get(session));
-            chatRoom.removeUser(user, user.getName() + " left the room.");
+            if (jo.get("roomId").getAsString().equals("All")) {
+                for (int roomId : user.getJoinedRoomIds()) {
+                    ChatRoom chatRoom = this.rooms.get(roomId);
+                    chatRoom.removeUser(user, user.getName() + " left the room.");
+                }
+            } else {
+                int roomId = jo.get("roomId").getAsInt();
+                ChatRoom chatRoom = this.rooms.get(roomId);
+                chatRoom.removeUser(user, user.getName() + " left the room.");
+            }
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());
@@ -299,7 +306,7 @@ public class DispatcherAdapter extends Observable {
             } else {
                 if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
                     receivers = chatRoom.getUsers();
-                    receivers.remove(Integer.valueOf(senderId));
+                    receivers.remove(senderId);
 
                 } else {
                     int receiverId = jo.get("receiverId").getAsInt();
