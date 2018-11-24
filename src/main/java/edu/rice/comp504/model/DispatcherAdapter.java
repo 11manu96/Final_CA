@@ -194,7 +194,16 @@ public class DispatcherAdapter extends Observable {
      * @param roomId the id of the chat room to be removed
      */
     public void unloadRoom(int roomId) {
-
+        ChatRoom chatRoom = rooms.get(roomId);
+        for (int userId : chatRoom.getUsers().keySet()) {
+            User curUser = users.get(userId);
+            curUser.removeRoom(chatRoom);
+            UserRoomResponse userRoomResponse = new UserRoomResponse(userId,
+                    curUser.getJoinedRoomIds(), curUser.getAvailableRoomIds());
+            notifyClient(curUser, userRoomResponse);
+        }
+        rooms.remove(roomId);
+        return;
     }
 
     /**
@@ -232,6 +241,12 @@ public class DispatcherAdapter extends Observable {
             ChatRoom chatRoom = this.rooms.get(roomId);
             User user = this.users.get(userIdFromSession.get(session));
             chatRoom.removeUser(user, user.getName() + " left the room.");
+
+            // if the user is owner, unload the chat room
+            if (user.getId() == chatRoom.getOwner().getId()) {
+                unloadRoom(chatRoom.getId());
+            }
+            
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());
