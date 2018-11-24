@@ -1,10 +1,12 @@
 package edu.rice.comp504.model.cmd;
 
-import com.sun.org.apache.bcel.internal.generic.RETURN;
+import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
+import edu.rice.comp504.model.res.RoomUsersResponse;
+import edu.rice.comp504.model.res.UserRoomResponse;
 
-public class  JoinRoomCmd implements IUserCmd {
+public class JoinRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
 
@@ -18,48 +20,20 @@ public class  JoinRoomCmd implements IUserCmd {
         this.user = user;
     }
 
-
-    /**
-     * Helper function get user.
-     * @return user
-     */
-    public User getUser(){
-        return user;
-    }
-
-    /**
-     * Helper function get chatRoom.
-     * @return chatRoom
-     */
-    public ChatRoom getChatRoom(){
-        return chatRoom;
-    }
-
-    /**
-     * Helper function set chatRoom.
-     * @param chatRoom chatRoom
-     */
-    public void setChatRoom(ChatRoom chatRoom){
-        this.chatRoom = chatRoom;
-    }
-
-    /**
-     * Helper function set user.
-     * @param user user
-     */
-    public void setUser(User user){
-        this.user = user;
-    }
-
     /**
      * Execute the command.
      * @param context user
      */
     @Override
     public void execute(User context) {
-        if (context.getId() == user.getId() && chatRoom.applyFilter(context)) {
-            chatRoom.addUser(context);
-            context.moveToJoined(chatRoom);
+        // if this user is joining, then update rooms lists
+        if (this.user == context) {
+            UserRoomResponse userRoomResponse = new UserRoomResponse(this.user.getId(),
+                    this.user.getJoinedRoomIds(), this.user.getAvailableRoomIds());
+            DispatcherAdapter.notifyClient(context, userRoomResponse);
         }
+        // all users update room users list
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
+        DispatcherAdapter.notifyClient(context, roomUsersResponse);
     }
 }

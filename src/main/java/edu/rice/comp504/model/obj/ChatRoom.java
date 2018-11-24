@@ -1,7 +1,11 @@
 package edu.rice.comp504.model.obj;
 
 import edu.rice.comp504.model.DispatcherAdapter;
+import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
+import edu.rice.comp504.model.res.RoomNotificationResponse;
+import edu.rice.comp504.model.res.RoomUsersResponse;
+import edu.rice.comp504.model.res.UserRoomResponse;
 
 import java.util.*;
 import java.util.Observable;
@@ -145,8 +149,16 @@ public class ChatRoom extends Observable {
      * Create a user joined notification message and then add user into the observer list
      */
     public boolean addUser(User user) {
+        // user available rooms only contains eligible rooms
         if (user.getAvailableRoomIds().contains(this.id)) {
             this.userNameFromUserId.put(user.getId(), user.getName());
+            addObserver(user);
+            user.moveToJoined(this);
+
+            JoinRoomCmd joinRoomCmd = new JoinRoomCmd(this, user);
+            setChanged();
+            notifyObservers(joinRoomCmd);
+
             return true;
         }
         return false;
@@ -161,8 +173,15 @@ public class ChatRoom extends Observable {
         int userid = user.getId();
         if (this.userNameFromUserId.containsKey(userid)) {
             this.userNameFromUserId.remove(userid);
-            this.notifications.add(reason);
             deleteObserver(user);
+            user.moveToAvailable(this);
+
+            this.notifications.add(reason);
+
+            LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(this, user);
+            setChanged();
+            notifyObservers(leaveRoomCmd);
+
             return true;
         }
         return false;
