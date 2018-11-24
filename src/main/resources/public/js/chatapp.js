@@ -132,10 +132,10 @@ function updateChatApp(message) {
         $("#slt-available-rooms").empty();
         // need to get room name somehow
         responseBody.joinedRoomIds.forEach(function(roomId) {
-            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
         });
         responseBody.availableRoomIds.forEach(function(roomId) {
-            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
         });
     } else if (responseBody.type === "RoomUsersResponse") {
         console.log(responseBody.users);
