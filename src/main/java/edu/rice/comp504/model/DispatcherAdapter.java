@@ -186,7 +186,7 @@ public class DispatcherAdapter extends Observable {
         this.users.remove(userId);
         this.userIdFromSession.remove(user.getSession());
 
-        for (int roomId : user.getJoinedRoomIds()) {
+        for (int roomId : new ArrayList<>(user.getJoinedRoomIds())) {
             ChatRoom chatRoom = this.rooms.get(roomId);
             chatRoom.removeUser(user, user.getName() + " closed the session");
         }
@@ -240,8 +240,7 @@ public class DispatcherAdapter extends Observable {
 
             User user = this.users.get(userIdFromSession.get(session));
             if (jo.get("roomId").getAsString().equals("All")) {
-                List<Integer> joinedRooms = new ArrayList<>(user.getJoinedRoomIds());
-                for (int roomId : joinedRooms) {
+                for (int roomId : new ArrayList<>(user.getJoinedRoomIds())) {
                     ChatRoom chatRoom = this.rooms.get(roomId);
                     chatRoom.removeUser(user, user.getName() + " left " + chatRoom.getName());
                 }
@@ -293,17 +292,16 @@ public class DispatcherAdapter extends Observable {
             // if the message content is illegal, quit user from all chatRooms
             if (rawMessage.contains("hate")) {
                 // leave all joined room
-                for (int removeRoomId : sender.getJoinedRoomIds()) {
+                for (int removeRoomId : new ArrayList<>(sender.getJoinedRoomIds())) {
                     ChatRoom removeRoom = rooms.get(removeRoomId);
                     removeRoom.removeUser(sender, sender.getName() + " was kicked from " + removeRoom.getName());
                 }
 
                 // remove all room from available room list
-                for (int removeRoomId : sender.getAvailableRoomIds()) {
+                for (int removeRoomId : new ArrayList<>(sender.getAvailableRoomIds())) {
                     sender.removeRoom(rooms.get(removeRoomId));
                 }
 
-                // userrooomlist response
                 notifyClient(sender, new UserRoomResponse(senderId, sender.getJoinedRoomIds(), sender.getAvailableRoomIds()));
             } else {
                 if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
