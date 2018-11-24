@@ -240,7 +240,8 @@ public class DispatcherAdapter extends Observable {
 
             User user = this.users.get(userIdFromSession.get(session));
             if (jo.get("roomId").getAsString().equals("All")) {
-                for (int roomId : user.getJoinedRoomIds()) {
+                List<Integer> joinedRooms = new ArrayList<>(user.getJoinedRoomIds());
+                for (int roomId : joinedRooms) {
                     ChatRoom chatRoom = this.rooms.get(roomId);
                     chatRoom.removeUser(user, user.getName() + " left the room.");
                 }

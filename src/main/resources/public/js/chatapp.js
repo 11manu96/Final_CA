@@ -58,7 +58,7 @@ function exitRoom() {
  * Send request to websocket to exit all rooms
  */
 function exitAllRooms() {
-
+    webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": "All"}}));
 }
 
 /**
