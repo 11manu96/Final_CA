@@ -4,7 +4,7 @@ import com.sun.org.apache.bcel.internal.generic.RETURN;
 import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
 
-public class JoinRoomCmd implements IUserCmd {
+public class  JoinRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
 

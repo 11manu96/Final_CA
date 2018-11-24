@@ -9,8 +9,8 @@ public class NewRoomResponse extends AResponse {
     private String roomName;
     private int ownerId;
 
-    public NewRoomResponse(String type, int roomId, String roomName, int ownerId) {
-        super(type);
+    public NewRoomResponse(int roomId, String roomName, int ownerId) {
+        super("NewRoomResponse");
         this.roomId = roomId;
         this.roomName = roomName;
         this.ownerId = ownerId;
