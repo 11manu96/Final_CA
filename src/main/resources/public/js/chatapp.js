@@ -33,23 +33,23 @@ function logIn() {
     var userSchool = $("#user-school").val();
     webSocket.send(JSON.stringify({"type": "login", "body":
             {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
-
-    $(".btn-logged-in").prop("disabled", false);
 }
 
 /**
  * Send request to websocket to enter room
  */
 function enterRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val();
+    var selectedRoom = $("#slt-joined-rooms").val()[0];
     currentRoom = selectedRoom;
+    webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
 }
 
 /**
  * Send request to websocket to exit all rooms
  */
 function exitRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val();
+    // TODO: enforce single selection
+    var selectedRoom = $("#slt-joined-rooms").val()[0];
     webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
 }
 
@@ -64,7 +64,8 @@ function exitAllRooms() {
  * Send request to websocket to join room
  */
 function joinRoom() {
-    var selectedRoom = $("#slt-available-rooms").val();
+    // TODO: enforce single selection
+    var selectedRoom = $("#slt-available-rooms").val()[0];
     webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
 }
 
@@ -117,6 +118,14 @@ function updateChatApp(message) {
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
     if (responseBody.type === "UserRoomResponse") {
+        // login, create room, join room, exit room
+
+        // enable buttons
+        if (loggedIn === false) {
+            loggedIn = true;
+            $(".logged-in").prop("disabled", false);
+            $(".not-logged-in").prop("disabled", true);
+        }
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
         // need to get room name somehow
@@ -125,6 +134,9 @@ function updateChatApp(message) {
         });
         responseBody.availableRoomIds.forEach(function(roomId) {
             $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
-        })
+        });
+    } else if (responseBody.type === "RoomUsersResponse") {
+        console.log(responseBody.users);
+        console.log(responseBody.users[0])
     }
 }

@@ -145,6 +145,10 @@ public class ChatRoom extends Observable {
      * Create a user joined notification message and then add user into the observer list
      */
     public boolean addUser(User user) {
+        if (user.getAvailableRoomIds().contains(this.id)) {
+            this.userNameFromUserId.put(user.getId(), user.getName());
+            return true;
+        }
         return false;
     }
 
@@ -155,15 +159,13 @@ public class ChatRoom extends Observable {
      */
     public boolean removeUser(User user, String reason) {
         int userid = user.getId();
-        Map<Integer,String> users = this.getUsers();
-        if (users.containsKey(userid)) {
-            users.remove(user.getId());
-            notifications.add(reason);
+        if (this.userNameFromUserId.containsKey(userid)) {
+            this.userNameFromUserId.remove(userid);
+            this.notifications.add(reason);
             deleteObserver(user);
             return true;
-        }  else {
-            return false;
         }
+        return false;
     }
 
     /**
