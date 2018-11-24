@@ -17,13 +17,19 @@ window.onload = function() {
     $("#btn-exit-all").click(exitAllRooms);
     $("#btn-join").click(joinRoom);
     $("#btn-create").click(createRoom);
-    $("#slt-room-users").click(loadMessages);
+    $("#slt-room-users").click(queryMessages);
     $("#btn-send").click(sendMessage);
     $("#btn-send-all").click(sendAll);
 
     webSocket.onmessage = function(message) {
         updateChatApp(message);
     };
+}
+
+function clearRoomUI() {
+    $("#chat-dialog").empty();
+    $("#slt-room-users").empty();
+    $("#room-title").text("Room Name");
 }
 
 /**
@@ -45,8 +51,7 @@ function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val()[0];
 
     currentRoom = selectedRoom;
-    $("#chat-dialog").empty();
-    $("#slt-room-users").empty();
+    clearRoomUI();
     webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
 }
 
@@ -59,8 +64,7 @@ function exitRoom() {
 
     if (currentRoom == selectedRoom) {
         currentRoom = null;
-        $("#chat-dialog").empty();
-        $("#slt-room-users").empty();
+        clearRoomUI();
     }
     webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
 }
@@ -70,8 +74,7 @@ function exitRoom() {
  */
 function exitAllRooms() {
     currentRoom = null;
-    $("#chat-dialog").empty();
-    $("#slt-room-users").empty();
+    clearRoomUI();
     webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": "All"}}));
 }
 
@@ -83,8 +86,7 @@ function joinRoom() {
     var selectedRoom = $("#slt-available-rooms").val()[0];
 
     currentRoom = selectedRoom;
-    $("#chat-dialog").empty();
-    $("#slt-room-users").empty();
+    clearRoomUI();
     webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
 }
 
@@ -106,7 +108,7 @@ function createRoom() {
 /**
  * Send request to websocket to retrieve message history
  */
-function loadMessages() {
+function queryMessages() {
     var user = $("#slt-room-users").val()[0];
     webSocket.send(JSON.stringify({"type": "query", "body":
             {"query": "userChatHistory", "roomId": currentRoom, "otherUserId": user}}));
@@ -119,6 +121,7 @@ function sendMessage() {
     // enforce one user selected
     var user = $("#slt-room-users").val()[0];
     var message = $("#chat-message").val();
+    $("#chat-message").val("");
     webSocket.send(JSON.stringify({"type": "send", "body":
             {"roomId": currentRoom, "message": message, "receiverId": user}}));
 }
@@ -132,6 +135,75 @@ function sendAll() {
             {"roomId": currentRoom, "message": message, "receiverId": "All"}}));
 }
 
+
+function loadRoomLists(responseBody) {
+    $("#slt-joined-rooms").empty();
+    $("#slt-available-rooms").empty();
+
+    // need to get room name somehow
+    responseBody.joinedRoomIds.forEach(function (roomId) {
+        $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
+    });
+    responseBody.availableRoomIds.forEach(function (roomId) {
+        $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
+    });
+}
+
+
+function loadRoomUsers(responseBody) {
+    // only update room users if room is currently open
+    if (currentRoom == responseBody.roomId) {
+        roomUsers = {};
+        $("#slt-room-users").empty();
+        var userList = responseBody.users;
+        Object.keys(userList).map(function (key) {
+            $("#slt-room-users").append($("<option></option>").attr("value", Number(key)).text(userList[key]));
+            roomUsers[key] = userList[key];
+        });
+        $("#room-title").text(roomNames[responseBody.roomId].name);
+        // disable send all button unless owner
+        if (currentUser === roomNames[currentRoom].owner) {
+            $(".owner-only").prop("disabled", false);
+        } else {
+            $(".owner-only").prop("disabled", true);
+        }
+    }
+}
+
+function addNewUser(responseBody) {
+    // enable buttons
+    if (loggedIn === false) {
+        loggedIn = true;
+        $(".logged-in").prop("disabled", false);
+        $(".not-logged-in").prop("disabled", true);
+    }
+    currentUser = responseBody.userId;
+}
+
+
+function addNewRoom(responseBody) {
+    roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": responseBody.ownerId};
+    // put owner in room
+    if (currentUser == responseBody.ownerId) {
+        currentRoom = responseBody.roomId;
+    }
+}
+
+
+function loadMessages(responseBody) {
+    // TODO: check that message is for the room currently open?
+    $("#chat-dialog").empty();
+    responseBody.chatHistory.forEach(function (message) {
+        $("#chat-dialog").append($("<ul></ul>").text(
+            roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
+    });
+}
+
+
+function loadNotifications(responseBody) {
+    $("#room-notification").text(responseBody.notifications[responseBody.notifications.length - 1]);
+}
+
 /**
  * Receive data from websocket to update view
  * @param message data from websocket
@@ -141,56 +213,16 @@ function updateChatApp(message) {
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
     if (responseBody.type === "UserRoom") {
-        $("#slt-joined-rooms").empty();
-        $("#slt-available-rooms").empty();
-
-        // need to get room name somehow
-        responseBody.joinedRoomIds.forEach(function (roomId) {
-            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
-        });
-        responseBody.availableRoomIds.forEach(function (roomId) {
-            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
-        });
+        loadRoomLists(responseBody);
     } else if (responseBody.type === "RoomUsers") {
-        // only update room users if room is currently open
-        if (currentRoom == responseBody.roomId) {
-            roomUsers = {};
-            $("#slt-room-users").empty();
-            var userList = responseBody.users;
-            Object.keys(userList).map(function (key) {
-                $("#slt-room-users").append($("<option></option>").attr("value", Number(key)).text(userList[key]));
-                roomUsers[key] = userList[key];
-            });
-            $("#room-title").text(roomNames[responseBody.roomId].name);
-            // disable send all button unless owner
-            if (currentUser === roomNames[currentRoom].owner) {
-                $(".owner-only").prop("disabled", false);
-            } else {
-                $(".owner-only").prop("disabled", true);
-            }
-        }
+        loadRoomUsers(responseBody);
     } else if (responseBody.type === "NewUser") {
-        // enable buttons
-        if (loggedIn === false) {
-            loggedIn = true;
-            $(".logged-in").prop("disabled", false);
-            $(".not-logged-in").prop("disabled", true);
-        }
-        currentUser = responseBody.userId;
+        addNewUser(responseBody);
     } else if (responseBody.type === "NewRoom") {
-        roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": responseBody.ownerId};
-        // put owner in room
-        if (currentUser == responseBody.ownerId) {
-            currentRoom = responseBody.roomId;
-        }
+        addNewRoom(responseBody);
     } else if (responseBody.type === "UserChatHistory") {
-        // TODO: check that message is for the room currently open?
-        $("#chat-dialog").empty();
-        responseBody.chatHistory.forEach(function (message) {
-            $("#chat-dialog").append($("<ul></ul>").text(
-                roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
-        });
+        loadMessages(responseBody);
     } else if (responseBody.type === "RoomNotifications") {
-        $("#room-notification").text(responseBody.notifications[responseBody.notifications.length - 1]);
+        loadNotifications(responseBody);
     }
 }
