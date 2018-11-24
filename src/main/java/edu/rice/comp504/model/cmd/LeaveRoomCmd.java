@@ -28,7 +28,8 @@ public class LeaveRoomCmd implements IUserCmd {
                 DispatcherAdapter.notifyClient(context, userRoomResponse);
             } else {
                 // all users update room users list
-                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getNotifications());
+                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getId(),
+                        this.chatRoom.getNotifications());
                 RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
                 DispatcherAdapter.notifyClient(context, roomNotificationResponse);
                 DispatcherAdapter.notifyClient(context, roomUsersResponse);
