@@ -322,6 +322,7 @@ public class DispatcherAdapter extends Observable {
 
                     // construct the message
                     Message message = new Message(nextMessageId++, roomId, senderId, receiverId, rawMessage);
+                    messages.put(message.getId(), message);
 
                     // store the message
                     chatRoom.storeMessage(sender, receiver, message);
