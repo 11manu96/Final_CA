@@ -44,9 +44,9 @@ function logIn() {
     console.log(userLocation + userSchool);
     if (userName == "") {
         $("#user-name").addClass("error")
-    }else if (userAge == "") {
+    } else if (userAge == "") {
         $("#user-age").addClass("error")
-    }else{
+    } else {
         webSocket.send(JSON.stringify({"type": "login", "body":
                 {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
     }
@@ -63,7 +63,7 @@ function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val();
     if (selectedRoom.length > 1) {
         $("#slt-joined-rooms").addClass("error")
-    }else {
+    } else {
         currentRoom = selectedRoom;
         clearRoomUI();
 
@@ -110,7 +110,7 @@ function joinRoom() {
     var selectedRoom = $("#slt-available-rooms").val();
     if (selectedRoom.length > 1) {
         $("#slt-available-rooms").addClass("error")
-    }else{
+    } else {
         currentRoom = selectedRoom;
         clearRoomUI();
         webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom[0]}}));
@@ -129,11 +129,11 @@ function createRoom() {
 
     if (roomName == "") {
         $("#room-name").addClass("error")
-    }else if (roomMinAge == "") {
+    } else if (roomMinAge == "") {
         $("#room-min-age").addClass("error")
-    }else if (roomMaxAge == "") {
+    } else if (roomMaxAge == "") {
         $("#room-max-age").addClass("error")
-    }else{
+    } else {
         //console.log(roomMinAge)
         webSocket.send(JSON.stringify({"type": "create", "body":
                 {"roomName": roomName, "ageLower": roomMinAge, "ageUpper": roomMaxAge,
@@ -275,12 +275,12 @@ function updateChatApp(message) {
     }
 }
 
-function clearError(){
+function clearError() {
     $("#user-name").removeClass("error")
     $("#user-age").removeClass("error")
 }
 
-function clearChatRoomError(){
+function clearChatRoomError() {
     $("#room-name").removeClass("error")
     $("#room-min-age").removeClass("error")
     $("#room-max-age").removeClass("error")
