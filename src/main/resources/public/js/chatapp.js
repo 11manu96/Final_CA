@@ -43,9 +43,9 @@ function logIn() {
 
     console.log(userLocation + userSchool);
     if (userName == ""){
-        document.getElementById("user-name").className = document.getElementById("user-name").className + " error";
+        document.getElementById("user-name").addClass("error")
     }else if (userAge == ""){
-        document.getElementById("user-age").className = document.getElementById("user-age").className + " error";
+        document.getElementById("user-age").addClass("error")
     }else{
         webSocket.send(JSON.stringify({"type": "login", "body":
                 {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
@@ -62,11 +62,12 @@ function logIn() {
 function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val();
     if(selectedRoom.length > 1){
-        document.getElementById("slt-joined-rooms").className = document.getElementById("slt-joined-rooms").className + " error";
+        $("#slt-joined-rooms").addClass("error")
     }else {
-        webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
         currentRoom = selectedRoom;
         clearRoomUI();
+
+        webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom[0]}}));
 
     }
 
@@ -80,7 +81,7 @@ function exitRoom() {
 
     var selectedRoom = $("#slt-joined-rooms").val();
     if(selectedRoom.length > 1){
-        document.getElementById("slt-joined-rooms").className = document.getElementById("slt-joined-rooms").className + " error";
+        $("#slt-joined-rooms").addClass("error")
     }else {
         
         if (currentRoom == selectedRoom) {
@@ -88,7 +89,7 @@ function exitRoom() {
           clearRoomUI();
         }
 
-        webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
+        webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom[0]}}));
     }
 }
 
@@ -108,11 +109,11 @@ function joinRoom() {
 
     var selectedRoom = $("#slt-available-rooms").val();
     if(selectedRoom.length > 1){
-        document.getElementById("slt-available-rooms").className = document.getElementById("slt-available-rooms").className + " error";
+        $("#slt-available-rooms").addClass("error")
     }else{
         currentRoom = selectedRoom;
         clearRoomUI();
-        webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
+        webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom[0]}}));
     }
 }
 
@@ -127,15 +128,11 @@ function createRoom() {
     var roomSchools = $("#slt-room-school").val();
 
     if (roomName == ""){
-        document.getElementById("room-name").className = document.getElementById("room-name").className + " error";
+        $("#room-name").addClass("error")
     }else if (roomMinAge == ""){
-        document.getElementById("room-min-age").className = document.getElementById("room-min-age").className + " error";
+        $("#room-min-age").addClass("error")
     }else if (roomMaxAge == ""){
-        document.getElementById("room-max-age").className = document.getElementById("room-max-age").className + " error";
-    }else  if (roomLocations.length > 1){
-        document.getElementById("slt-room-location").className = document.getElementById("slt-room-location").className + " error";
-    }else  if (roomSchools.length > 1){
-        document.getElementById("slt-room-school").className = document.getElementById("slt-room-school").className + " error";
+        $("#room-max-age").addClass("error")
     }else{
         //console.log(roomMinAge)
         webSocket.send(JSON.stringify({"type": "create", "body":
@@ -279,19 +276,19 @@ function updateChatApp(message) {
 }
 
 function clearError(){
-    document.getElementById("user-name").className = document.getElementById("user-name").className.replace(" error", "");
-    document.getElementById("user-age").className = document.getElementById("user-age").className.replace(" error", "");
+    $("#user-name").removeClass("error")
+    $("#user-age").removeClass("error")
 }
 
 function clearChatRoomError(){
-    document.getElementById("room-name").className = document.getElementById("room-name").className.replace(" error", "");
-    document.getElementById("room-min-age").className = document.getElementById("room-min-age").className.replace(" error", "");
-    document.getElementById("room-max-age").className = document.getElementById("room-max-age").className.replace(" error", "");
-    document.getElementById("slt-room-location").className = document.getElementById("slt-room-location").className.replace(" error", "");
-    document.getElementById("slt-room-school").className = document.getElementById("slt-room-school").className.replace(" error", "");
+    $("#room-name").removeClass("error")
+    $("#room-min-age").removeClass("error")
+    $("#room-max-age").removeClass("error")
+    $("#slt-room-location").removeClass("error")
+    $("#slt-room-school").removeClass("error")
 }
 
 function clearRoomSelectError() {
-    document.getElementById("slt-joined-rooms").className = document.getElementById("slt-joined-rooms").className.replace(" error", "");
-    document.getElementById("slt-available-rooms").className = document.getElementById("slt-available-rooms").className.replace(" error", "");
+    $("#slt-joined-rooms").removeClass("error")
+    $("#slt-available-rooms").removeClass("error")
 }
