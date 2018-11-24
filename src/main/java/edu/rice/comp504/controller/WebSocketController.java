@@ -36,6 +36,7 @@ public class WebSocketController {
     public void onMessage(Session user, String message) {
         DispatcherAdapter dis = ChatAppController.getDispatcher();
         JsonObject jo = new JsonParser().parse(message).getAsJsonObject();
+        System.out.println(jo);
         String cmd = jo.get("type").getAsString();
 
         switch (cmd) {
