@@ -5,8 +5,8 @@ import java.util.List;
 public class RoomNotificationResponse extends AResponse {
     private int roomid;
     private List<String> notifications;
-    public RoomNotificationResponse(String type, List<String> notifications) {
-        super(type);
+    public RoomNotificationResponse(List<String> notifications) {
+        super("RoomNotificationsResponse");
         this.notifications = notifications;
     }
 }
