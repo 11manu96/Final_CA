@@ -307,7 +307,7 @@ public class DispatcherAdapter extends Observable {
                 notifyClient(sender, new UserRoomResponse(senderId, sender.getJoinedRoomIds(), sender.getAvailableRoomIds()));
             } else {
                 if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
-                    receivers = chatRoom.getUsers();
+                    receivers = new HashMap<>(chatRoom.getUsers());
                     receivers.remove(senderId);
 
                 } else {
