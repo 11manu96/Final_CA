@@ -3,6 +3,8 @@
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
 var loggedIn = false;
 var currentRoom = null;
+var userNames = {};
+var roomNames = {};
 
 /**
  * Entry point into chat room
@@ -130,13 +132,17 @@ function updateChatApp(message) {
         $("#slt-available-rooms").empty();
         // need to get room name somehow
         responseBody.joinedRoomIds.forEach(function(roomId) {
-            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
         });
         responseBody.availableRoomIds.forEach(function(roomId) {
-            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
         });
     } else if (responseBody.type === "RoomUsersResponse") {
         console.log(responseBody.users);
         console.log(responseBody.users[0])
+    } else if (responseBody.type === "NewUserResponse") {
+        userNames[responseBody.userId] = responseBody.userName;
+    } else if (responseBody.type === "NewRoomResponse") {
+        roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": userNames[responseBody.ownerId]};
     }
 }
