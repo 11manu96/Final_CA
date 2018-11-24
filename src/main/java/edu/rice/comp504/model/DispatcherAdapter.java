@@ -183,12 +183,14 @@ public class DispatcherAdapter extends Observable {
      */
     public void unloadUser(int userId) {
         User user = this.users.get(userId);
+        this.users.remove(userId);
+        this.userIdFromSession.remove(user.getSession());
 
         for (int roomId : user.getJoinedRoomIds()) {
             ChatRoom chatRoom = this.rooms.get(roomId);
             chatRoom.removeUser(user, user.getName() + " closed the session.");
         }
-        this.users.remove(userId);
+
         deleteObserver(user);
     }
 

@@ -22,11 +22,14 @@ public class RemoveRoomCmd implements IUserCmd {
      */
     @Override
     public void execute(User context) {
-        if (context.getJoinedRoomIds().contains(this.chatRoom.getId()) ||
-                context.getAvailableRoomIds().contains(this.chatRoom.getId())) {
-            context.removeRoom(this.chatRoom);
+        // only send message to live sessions
+        if (this.chatRoom.getDispatcher().containsSession(context.getSession())) {
+            if (context.getJoinedRoomIds().contains(this.chatRoom.getId()) ||
+                    context.getAvailableRoomIds().contains(this.chatRoom.getId())) {
+                context.removeRoom(this.chatRoom);
+                DispatcherAdapter.notifyClient(context, new UserRoomResponse(context.getId(),
+                        context.getJoinedRoomIds(), context.getAvailableRoomIds()));
+            }
         }
-        DispatcherAdapter.notifyClient(context, new UserRoomResponse(context.getId(),
-                context.getJoinedRoomIds(), context.getAvailableRoomIds()));
     }
 }
