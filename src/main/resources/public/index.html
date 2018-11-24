@@ -14,8 +14,8 @@
             <h3>Login</h3>
         </div>
         <div class="center-box">
-            Name: <input id="user-name" class="not-logged-in" type="text" placeholder="Enter your name">
-            Age: <input id="user-age" class="not-logged-in" type="number" min="0" max="100">
+            Name: <input id="user-name" class="not-logged-in" type="text" placeholder="Enter your name" onClick="clearError()">
+            Age: <input id="user-age" class="not-logged-in" type="number" min="0" max="100" onClick="clearError()">
             Location:
             <select id="user-location" class="not-logged-in">
                 <option value="North America">North America</option>
@@ -54,7 +54,7 @@
                     </tr>
                     <tr>
                         <td>
-                            <select id="slt-joined-rooms" multiple size="10" class="full-width">
+                            <select id="slt-joined-rooms" multiple size="10" class="full-width" onclick="clearRoomSelectError()">
                             </select>
                         </td>
                         <td>
@@ -73,7 +73,7 @@
                             </div>
                         </td>
                         <td>
-                            <select id="slt-available-rooms" multiple size="10" class="full-width">
+                            <select id="slt-available-rooms" multiple size="10" class="full-width" onclick="clearRoomSelectError()">
                             </select>
                         </td>
                     </tr>
@@ -88,20 +88,20 @@
                     <tr>
                         <td>Name:</td>
                         <td>
-                            <input id="room-name" type="text" placeholder="Enter room name">
+                            <input id="room-name" type="text" placeholder="Enter room name" onclick="clearChatRoomError()">
                         </td>
                     </tr>
                     <tr>
                         <td>Ages:</td>
                         <td>
-                            <input id="room-min-age" type="number" min="0" max="100" placeholder="Min"> -
-                            <input id="room-max-age" type="number" min="0" max="100" placeholder="Max">
+                            <input id="room-min-age" type="number" min="0" max="100" placeholder="Min" onclick="clearChatRoomError()"> -
+                            <input id="room-max-age" type="number" min="0" max="100" placeholder="Max" onclick="clearChatRoomError()">
                         </td>
                     </tr>
                     <tr>
                         <td>Locations:</td>
                         <td>
-                            <select id="slt-room-location" multiple size="7" class="full-width">
+                            <select id="slt-room-location" multiple size="7" class="full-width" onclick="clearChatRoomError()">
                                 <option>North America</option>
                                 <option>South America</option>
                                 <option>Europe</option>
@@ -115,7 +115,7 @@
                     <tr>
                         <td>Schools:</td>
                         <td>
-                            <select id="slt-room-school" multiple size="5" class="full-width">
+                            <select id="slt-room-school" multiple size="5" class="full-width" onclick="clearChatRoomError()">
                                 <option>Rice</option>
                                 <option>Harvard</option>
                                 <option>Duke</option>
