@@ -120,8 +120,6 @@ function updateChatApp(message) {
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
     if (responseBody.type === "UserRoomResponse") {
-        // login, create room, join room, exit room
-
         // enable buttons
         if (loggedIn === false) {
             loggedIn = true;
