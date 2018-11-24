@@ -211,38 +211,24 @@ public class DispatcherAdapter extends Observable {
     public void leaveRoom(Session session, String body) {
         // parse body
         JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        int roomId = jo.get("roomId").getAsInt();
-
-        ChatRoom chatRoom = this.rooms.get(roomId);
         User user = this.users.get(userIdFromSession.get(session));
-        chatRoom.removeUser(user, user.getName() + " left the room.");
-    }
-
-
-    /** Make a user volunteer leave all chat rooms.
-     *
-     * @param session the session that requests to called the method
-     *
-     */
-
-    public void leaveallrooms(Session session) {
-
-
-        // get user
-        User user = this.users.get(userIdFromSession.get(session));
-
-
-        for (int roomid : user.getJoinedRoomIds()) {
-            ChatRoom chatRoom = this.rooms.get(roomid);
-
-            // leave room
-            chatRoom.removeUser(user, user.getName() + " left the room");
-            user.moveToAvailable(chatRoom);
-
-
+        try {
+            int roomId = jo.get("roomId").getAsInt();
+            ChatRoom chatRoom = this.rooms.get(roomId);
+            chatRoom.removeUser(user, user.getName() + " left the room.");
         }
+        catch (ClassCastException e) {
+            // string "all", leave all rooms
+            for (int roomid : user.getJoinedRoomIds()) {
+                ChatRoom chatRoom = this.rooms.get(roomid);
 
+                chatRoom.removeUser(user, user.getName() + " left the room");
+
+            }
+        }
     }
+
+
 
     /**
      * Make modification on chat room filer by the owner.
