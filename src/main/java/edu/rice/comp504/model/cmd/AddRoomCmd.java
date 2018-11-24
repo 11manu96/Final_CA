@@ -29,6 +29,9 @@ public class AddRoomCmd implements IUserCmd {
         // all qualifying users update chat rooms list
         if (this.chatRoom.applyFilter(context)) {
             context.addRoom(this.chatRoom);
+            if (context == chatRoom.getOwner()) {
+                context.moveToJoined(this.chatRoom);
+            }
             DispatcherAdapter.notifyClient(context, new UserRoomResponse(context.getId(),
                     context.getJoinedRoomIds(), context.getAvailableRoomIds()));
         }

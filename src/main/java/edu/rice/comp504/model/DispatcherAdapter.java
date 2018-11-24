@@ -101,8 +101,9 @@ public class DispatcherAdapter extends Observable {
             }
         }
 
-        // add user object to lookup
+        // add user object to lookup and observers
         users.put(newUser.getId(), newUser);
+        addObserver(newUser);
 
         // send responses to new user
         NewUserResponse newUserResponse = new NewUserResponse(newUser.getId(), name);
@@ -153,9 +154,6 @@ public class DispatcherAdapter extends Observable {
             setChanged();
             notifyObservers(addRoomCmd);
 
-            // add owner to room
-            owner.moveToJoined(newRoom);
-
             return newRoom;
         } else {
             // TODO: notify the owner he is invalid
@@ -176,6 +174,7 @@ public class DispatcherAdapter extends Observable {
             chatRoom.removeUser(user, user.getName() + " closed the session.");
         }
         this.users.remove(userId);
+        deleteObserver(user);
     }
 
     /**
