@@ -40,33 +40,57 @@ function logIn() {
     var userAge = $("#user-age").val();
     var userLocation = $("#user-location").val();
     var userSchool = $("#user-school").val();
-    webSocket.send(JSON.stringify({"type": "login", "body":
-            {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
+
+    console.log(userLocation + userSchool);
+    if (userName == "") {
+        $("#user-name").addClass("error")
+    } else if (userAge == "") {
+        $("#user-age").addClass("error")
+    } else {
+        webSocket.send(JSON.stringify({"type": "login", "body":
+                {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
+    }
+
+
+
+
 }
 
 /**
  * Send request to websocket to enter room
  */
 function enterRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val()[0];
+    var selectedRoom = $("#slt-joined-rooms").val();
+    if (selectedRoom.length > 1) {
+        $("#slt-joined-rooms").addClass("error")
+    } else {
+        currentRoom = selectedRoom;
+        clearRoomUI();
 
-    currentRoom = selectedRoom;
-    clearRoomUI();
-    webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
+        webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom[0]}}));
+
+    }
+
+
 }
 
 /**
  * Send request to websocket to exit all rooms
  */
 function exitRoom() {
-    // TODO: enforce single selection
-    var selectedRoom = $("#slt-joined-rooms").val()[0];
 
-    if (currentRoom == selectedRoom) {
-        currentRoom = null;
-        clearRoomUI();
+    var selectedRoom = $("#slt-joined-rooms").val();
+    if(selectedRoom.length > 1){
+        $("#slt-joined-rooms").addClass("error")
+    }else {
+        
+        if (currentRoom == selectedRoom) {
+          currentRoom = null;
+          clearRoomUI();
+        }
+
+        webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom[0]}}));
     }
-    webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
 }
 
 /**
@@ -82,12 +106,15 @@ function exitAllRooms() {
  * Send request to websocket to join room
  */
 function joinRoom() {
-    // TODO: enforce single selection
-    var selectedRoom = $("#slt-available-rooms").val()[0];
 
-    currentRoom = selectedRoom;
-    clearRoomUI();
-    webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
+    var selectedRoom = $("#slt-available-rooms").val();
+    if (selectedRoom.length > 1) {
+        $("#slt-available-rooms").addClass("error")
+    } else {
+        currentRoom = selectedRoom;
+        clearRoomUI();
+        webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom[0]}}));
+    }
 }
 
 /**
@@ -100,10 +127,21 @@ function createRoom() {
     var roomLocations = $("#slt-room-location").val();
     var roomSchools = $("#slt-room-school").val();
 
-    webSocket.send(JSON.stringify({"type": "create", "body":
-            {"roomName": roomName, "ageLower": roomMinAge, "ageUpper": roomMaxAge,
-                "location": roomLocations, "school": roomSchools}}));
+    if (roomName == "") {
+        $("#room-name").addClass("error")
+    } else if (roomMinAge == "") {
+        $("#room-min-age").addClass("error")
+    } else if (roomMaxAge == "") {
+        $("#room-max-age").addClass("error")
+    } else {
+        //console.log(roomMinAge)
+        webSocket.send(JSON.stringify({"type": "create", "body":
+                {"roomName": roomName, "ageLower": roomMinAge, "ageUpper": roomMaxAge,
+                    "location": roomLocations, "school": roomSchools}}));
+    }
 }
+
+
 
 /**
  * Send request to websocket to retrieve message history
@@ -235,4 +273,22 @@ function updateChatApp(message) {
     } else if (responseBody.type === "RoomNotifications") {
         loadNotifications(responseBody);
     }
+}
+
+function clearError() {
+    $("#user-name").removeClass("error")
+    $("#user-age").removeClass("error")
+}
+
+function clearChatRoomError() {
+    $("#room-name").removeClass("error")
+    $("#room-min-age").removeClass("error")
+    $("#room-max-age").removeClass("error")
+    $("#slt-room-location").removeClass("error")
+    $("#slt-room-school").removeClass("error")
+}
+
+function clearRoomSelectError() {
+    $("#slt-joined-rooms").removeClass("error")
+    $("#slt-available-rooms").removeClass("error")
 }
