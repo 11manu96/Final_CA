@@ -119,7 +119,7 @@ function updateChatApp(message) {
     // parse message to determine how to update view
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
-    if (responseBody.type === "UserRoomResponse") {
+    if (responseBody.type === "UserRoom") {
 
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
@@ -131,7 +131,7 @@ function updateChatApp(message) {
         responseBody.availableRoomIds.forEach(function (roomId) {
             $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
         });
-    } else if (responseBody.type === "RoomUsersResponse") {
+    } else if (responseBody.type === "RoomUsers") {
         roomUsers = {};
         $("#slt-room-users").empty();
         var userList = responseBody.users;
@@ -141,16 +141,16 @@ function updateChatApp(message) {
         });
         $("#room-title").text(roomNames[responseBody.roomId].name);
         currentRoom = responseBody.roomId;
-    } else if (responseBody.type === "NewUserResponse") {
+    } else if (responseBody.type === "NewUser") {
         // enable buttons
         if (loggedIn === false) {
             loggedIn = true;
             $(".logged-in").prop("disabled", false);
             $(".not-logged-in").prop("disabled", true);
         }
-    } else if (responseBody.type === "NewRoomResponse") {
+    } else if (responseBody.type === "NewRoom") {
         roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": responseBody.ownerId};
-    } else if (responseBody.type === "UserChatHistoryResponse") {
+    } else if (responseBody.type === "UserChatHistory") {
         // TODO: check that message is for the room currently open
         $("#chat-dialog").empty();
         responseBody.chatHistory.forEach(function (message) {

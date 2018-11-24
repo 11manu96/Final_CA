@@ -6,7 +6,7 @@ public class RoomUsersResponse extends AResponse {
     private Map<Integer, String> users;
 
     public RoomUsersResponse(int roomId, Map<Integer, String> users) {
-        super("RoomUsersResponse");
+        super("RoomUsers");
         this.roomId = roomId;
         this.users = users;
     }

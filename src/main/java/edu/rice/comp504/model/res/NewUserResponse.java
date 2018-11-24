@@ -5,7 +5,7 @@ public class NewUserResponse extends AResponse {
     private String userName;
 
     public NewUserResponse(int userID, String userName) {
-        super("NewUserResponse");
+        super("NewUser");
         this.userId = userId;
         this.userName = userName;
     }
