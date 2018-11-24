@@ -140,7 +140,7 @@ public class User implements Observer {
      * */
     public void moveToJoined(ChatRoom room) {
         int roomId = room.getId();
-        this.availableRoomIds.remove(roomId);
+        this.availableRoomIds.remove(Integer.valueOf(roomId));
         this.joinedRoomIds.add(roomId);
     }
 
@@ -149,9 +149,9 @@ public class User implements Observer {
      * @param room the chat room object
      * */
     public void moveToAvailable(ChatRoom room) {
-        int chatroomid = room.getId();
-        this.getJoinedRoomIds().remove(chatroomid);
-        this.getAvailableRoomIds().add(chatroomid);
+        int roomId = room.getId();
+        this.joinedRoomIds.remove(Integer.valueOf(roomId));
+        this.availableRoomIds.add(roomId);
     }
 
     /**
