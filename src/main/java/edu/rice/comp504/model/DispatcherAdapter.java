@@ -295,6 +295,47 @@ public class DispatcherAdapter extends Observable {
         }
     }
 
+
+    /** Make a user volunteer leave all chat rooms.
+     *
+     * @param session the session that requests to called the method
+     *
+     */
+
+    public void leaveallrooms(Session session) {
+
+
+        // get user
+        User user = this.users.get(userIdFromSession.get(session));
+
+
+        for (int roomid : user.getJoinedRoomIds()) {
+            ChatRoom chatRoom = this.rooms.get(roomid);
+
+            // leave room
+            chatRoom.removeUser(user, user.getName() + " left the room");
+            user.moveToAvailable(chatRoom);
+
+            // userrooomlist response
+            UserRoomResponse userRoomResponse = new UserRoomResponse(userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
+            notifyClient(user, userRoomResponse);
+
+            // notification response
+            RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
+            // roomuserlist response
+            RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
+
+            // notify all users in room
+            for (Map.Entry pair : chatRoom.getUsers().entrySet()) {
+                User notifyUser = this.users.get(pair.getKey());
+                notifyClient(notifyUser, roomUsersResponse);
+                notifyClient(notifyUser, roomNotificationResponse);
+            }
+
+        }
+
+    }
+
     /**
      * Make modification on chat room filer by the owner.
      *

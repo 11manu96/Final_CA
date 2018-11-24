@@ -58,6 +58,8 @@ public class WebSocketController {
             case "query":
                 dis.query(user, message);
                 break;
+            case "leaveallrooms":
+                dis.leaveallrooms(user);
             default:
                 break;
         }
