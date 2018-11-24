@@ -3,6 +3,7 @@
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
 var loggedIn = false;
 var currentRoom = null;
+var currentUser = null;
 var roomNames = {};
 var roomUsers = {};
 
@@ -123,7 +124,6 @@ function updateChatApp(message) {
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
     if (responseBody.type === "UserRoom") {
-
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
 
@@ -144,6 +144,12 @@ function updateChatApp(message) {
         });
         $("#room-title").text(roomNames[responseBody.roomId].name);
         currentRoom = responseBody.roomId;
+        // disable send all button unless owner
+        if (currentUser === roomNames[currentRoom].owner) {
+            $(".owner-only").prop("disabled", false);
+        } else {
+            $(".owner-only").prop("disabled", true);
+        }
     } else if (responseBody.type === "NewUser") {
         // enable buttons
         if (loggedIn === false) {
@@ -151,6 +157,7 @@ function updateChatApp(message) {
             $(".logged-in").prop("disabled", false);
             $(".not-logged-in").prop("disabled", true);
         }
+        currentUser = responseBody.userId;
     } else if (responseBody.type === "NewRoom") {
         roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": responseBody.ownerId};
     } else if (responseBody.type === "UserChatHistory") {
