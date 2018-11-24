@@ -139,7 +139,7 @@ function updateChatApp(message) {
     } else if (responseBody.type === "RoomUsersResponse") {
 
 
-        removeOptions(document.getElementById("slt-room-users"));
+        $("#slt-room-users").empty();
         var userList  = responseBody.users
         var result = Object.keys(userList).map(function(key) {
             console.log(userList[key], Number(key))
@@ -149,14 +149,5 @@ function updateChatApp(message) {
 
 
 
-    }
-}
-
-function removeOptions(selectbox)
-{
-    var i;
-    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
-    {
-        selectbox.remove(i);
     }
 }

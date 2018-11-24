@@ -153,7 +153,7 @@ public class DispatcherAdapter extends Observable {
             map.put(owner.getId(), owner.getName());
             newRoom.setUsers(map);
 
-            // add room to all rooms list
+            // add room to all rooms listFl
             this.rooms.put(newRoom.getId(), newRoom);
 
             AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
@@ -162,7 +162,7 @@ public class DispatcherAdapter extends Observable {
 
             return newRoom;
         } else {
-            // TODO: notify the owner he is invalid
+            // TODO: notify the owner he is invaKlid
             return null;
         }
     }
