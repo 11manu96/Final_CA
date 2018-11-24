@@ -3,6 +3,8 @@
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
 var loggedIn = false;
 var currentRoom = null;
+var userNames = {};
+var roomNames = {};
 
 /**
  * Entry point into chat room
@@ -138,5 +140,9 @@ function updateChatApp(message) {
     } else if (responseBody.type === "RoomUsersResponse") {
         console.log(responseBody.users);
         console.log(responseBody.users[0])
+    } else if (responseBody.type === "NewUserResponse") {
+        userNames[responseBody.userId] = responseBody.userName;
+    } else if (responseBody.type === "NewRoomResponse") {
+        roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": userNames[responseBody.ownerId]};
     }
 }
