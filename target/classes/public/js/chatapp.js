@@ -98,27 +98,7 @@ function sendAll() {
  */
 function updateChatApp(message) {
     // parse message to determine how to update view
-    // convert the data to JSON and append the message to the chat area
-    // var data = JSON.parse(message.data);
-    // $("#chatArea").append(data.userMessage);
-
-    // var chatHistory = "";
-    // var mesList = "";
-    // var roomUsers = "";
-    // var userList = "";
-    // // chatHistory = data.chatHistory;
-    // // roomUsers = data.roomUsers;
-    //
-    // // update Room messages
-    // chatHistory = ['1','2','3'];// debug data
-    // $.each(chatHistory,function(i,item){
-    //     mesList += "<ul>"+item+"</ul>";
-    // });
-    // $("#chat-dialog").html(mesList);
-    // // update Room users
-    // roomUsers = ['U1','U2','U3'];// debug data
-    // $.each(roomUsers,function(i,item){
-    //     userList += "<option class='opt-room-user'>"+item+"</option>";
-    // });
-    // $("#slt-room-users").html(userList);
+    // TODO convert the data to JSON and append the message to the chat area
+    var data = JSON.parse(message.data);
+    $("#chatArea").append(data.userMessage);
 }

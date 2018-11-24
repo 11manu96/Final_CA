@@ -1,0 +1,63 @@
+html {
+    height: 95%;
+}
+
+body {
+    height: 100%;
+}
+
+ul {
+    margin: 0;
+    padding: 0;
+}
+
+.padded-box {
+    padding: 0 50px;
+}
+
+.fill-col {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.fill-row {
+    width: 100%;
+    display: flex;
+}
+
+.fill-box {
+    flex: 1;
+}
+
+.center-box {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.half-box {
+    width: 50%;
+}
+
+.third-box {
+    width: 30%;
+}
+
+.fifth-box {
+    width: 20%;
+}
+
+#chat-dialog {
+    overflow-y: scroll;
+    border: 1px solid black;
+    padding: 10px 10px;
+}
