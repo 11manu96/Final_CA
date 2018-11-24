@@ -19,7 +19,7 @@ public class LeaveRoomCmd implements IUserCmd {
 
     @Override
     public void execute(User context) {
-        // if this user is joining, then update rooms lists
+        // if this user is leaving, then update rooms lists
         if (this.user == context) {
             UserRoomResponse userRoomResponse = new UserRoomResponse(this.user.getId(),
                     this.user.getJoinedRoomIds(), this.user.getAvailableRoomIds());

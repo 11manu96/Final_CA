@@ -239,21 +239,6 @@ public class DispatcherAdapter extends Observable {
             chatRoom.removeUser(user, user.getName() + " left the room");
             user.moveToAvailable(chatRoom);
 
-            // userrooomlist response
-            UserRoomResponse userRoomResponse = new UserRoomResponse(userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
-            notifyClient(user, userRoomResponse);
-
-            // notification response
-            RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
-            // roomuserlist response
-            RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
-
-            // notify all users in room
-            for (Map.Entry pair : chatRoom.getUsers().entrySet()) {
-                User notifyUser = this.users.get(pair.getKey());
-                notifyClient(notifyUser, roomUsersResponse);
-                notifyClient(notifyUser, roomNotificationResponse);
-            }
 
         }
 
