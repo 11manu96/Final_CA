@@ -120,6 +120,12 @@ public class ChatRoom extends Observable {
     }
 
     /**
+     * sets users in the chat room
+     */
+    public void setUsers(Map<Integer, String> map) {
+         this.userNameFromUserId = map;
+    }
+    /**
      * Check if user satisfy the age, location and school restriction
      * @return boolean value indicating whether the user is eligible to join the room
      */
@@ -149,6 +155,7 @@ public class ChatRoom extends Observable {
      * Create a user joined notification message and then add user into the observer list
      */
     public boolean addUser(User user) {
+
         // user available rooms only contains eligible rooms
         if (user.getAvailableRoomIds().contains(this.id)) {
             this.userNameFromUserId.put(user.getId(), user.getName());

@@ -3,8 +3,6 @@
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
 var loggedIn = false;
 var currentRoom = null;
-var userNames = {};
-var roomNames = {};
 
 /**
  * Entry point into chat room
@@ -118,8 +116,10 @@ function sendAll() {
 function updateChatApp(message) {
     // parse message to determine how to update view
     var responseBody = JSON.parse(message.data);
-    console.log(responseBody);
+    //console.log(responseBody);
     if (responseBody.type === "UserRoomResponse") {
+        // login, create room, join room, exit room
+
         // enable buttons
         if (loggedIn === false) {
             loggedIn = true;
@@ -128,19 +128,26 @@ function updateChatApp(message) {
         }
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
+
         // need to get room name somehow
         responseBody.joinedRoomIds.forEach(function(roomId) {
-            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
+            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         });
         responseBody.availableRoomIds.forEach(function(roomId) {
-            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
+            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         });
     } else if (responseBody.type === "RoomUsersResponse") {
-        console.log(responseBody.users);
-        console.log(responseBody.users[0])
-    } else if (responseBody.type === "NewUserResponse") {
-        userNames[responseBody.userId] = responseBody.userName;
-    } else if (responseBody.type === "NewRoomResponse") {
-        roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": userNames[responseBody.ownerId]};
+
+
+        $("#slt-room-users").empty();
+        var userList  = responseBody.users
+        var result = Object.keys(userList).map(function(key) {
+            console.log(userList[key], Number(key))
+            $("#slt-room-users").append($("<option></option>").attr("value", Number(key)).text(userList[key]))
+
+        });
+
+
+
     }
 }
