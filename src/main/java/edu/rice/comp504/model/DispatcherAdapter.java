@@ -231,12 +231,11 @@ public class DispatcherAdapter extends Observable {
 
             // notify all users in room
             while (it.hasNext()) {
-                Map.Entry pair = (Map.Entry)it.next();
+                Map.Entry pair = (Map.Entry) it.next();
                 User tempUser = users.get(pair.getKey());
                 notifyClient(tempUser, roomUsersResponse);
                 notifyClient(tempUser, roomNotificationResponse);
             }
-
 
 
         } else {
@@ -281,12 +280,11 @@ public class DispatcherAdapter extends Observable {
         Iterator it = notifyUsers.entrySet().iterator();
 
         while (it.hasNext()) {
-            Map.Entry pair = (Map.Entry)it.next();
+            Map.Entry pair = (Map.Entry) it.next();
             User tempUser = users.get(pair.getKey());
             notifyClient(tempUser, roomUsersResponse);
             notifyClient(tempUser, roomNotificationResponse);
         }
-
 
 
     }
@@ -327,37 +325,35 @@ public class DispatcherAdapter extends Observable {
         //check if message has word "hate"
         int result = rawMessage.indexOf("hate");
         boolean illegalMessage = false;
-        if(result >= 0){
+        if (result >= 0) {
             illegalMessage = true;
         }
 
         //if the message content is illegal, quit user from all chatRooms
-        if(illegalMessage){
+        if (illegalMessage) {
             //leave all joined room
-            for (int i = 0; i < sender.getJoinedRoomIds().size(); i++) {
-                LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(rooms.get(sender.getJoinedRoomIds().get(i)), sender, "illegal message");
-                leaveRoomCmd.execute(sender);
+            for (int i : sender.getJoinedRoomIds()) {
+                rooms.get(i).removeUser(sender, "illegal message");
+                sender.moveToAvailable(chatRoom);
 
-                Map<Integer, String> notifyUsers = chatRoom.getUsers();
+                Map<Integer, String> notifyUsers = rooms.get(i).getUsers();
 
                 //notification response
-                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
+                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(rooms.get(i).getNotifications());
                 //roomuserlist response
-                RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
+                RoomUsersResponse roomUsersResponse = new RoomUsersResponse(rooms.get(i).getId(), rooms.get(i).getUsers());
 
-                Iterator it = notifyUsers.entrySet().iterator();
-
-                while (it.hasNext()) {
-                    Map.Entry pair = (Map.Entry)it.next();
-                    User tempUser = users.get(pair.getKey());
+                for (Integer key : notifyUsers.keySet()) {
+                    User tempUser = users.get(key);
                     notifyClient(tempUser, roomUsersResponse);
                     notifyClient(tempUser, roomNotificationResponse);
                 }
+
             }
 
             //remove all room from available room list
-            for(int i = 0; i < sender.getAvailableRoomIds().size(); i++){
-                sender.removeRoom(rooms.get(sender.getAvailableRoomIds().get(i)));
+            for (int i : sender.getAvailableRoomIds()) {
+                sender.removeRoom(rooms.get(i));
             }
 
             //userrooomlist response
