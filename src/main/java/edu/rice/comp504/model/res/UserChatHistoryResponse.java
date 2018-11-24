@@ -11,7 +11,7 @@ public class UserChatHistoryResponse extends AResponse {
      * Constructor.
      */
     public UserChatHistoryResponse(List<Message> chatHistory) {
-        super("UserChatHistoryResponse");
+        super("UserChatHistory");
         this.chatHistory = chatHistory;
     }
 

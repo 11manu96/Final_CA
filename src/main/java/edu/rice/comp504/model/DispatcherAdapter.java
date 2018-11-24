@@ -7,6 +7,7 @@ import com.google.gson.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import edu.rice.comp504.model.cmd.AddRoomCmd;
+import edu.rice.comp504.model.cmd.RemoveRoomCmd;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -97,6 +98,9 @@ public class DispatcherAdapter extends Observable {
 
             // check rooms available to user
             for (ChatRoom room : rooms.values()) {
+                // send new user all existing room mappings
+                DispatcherAdapter.notifyClient(session, new NewRoomResponse(room.getId(),
+                        room.getName(), room.getOwner().getId()));
                 if (room.applyFilter(newUser)) {
                     newUser.addRoom(room);
                 }
@@ -179,12 +183,14 @@ public class DispatcherAdapter extends Observable {
      */
     public void unloadUser(int userId) {
         User user = this.users.get(userId);
+        this.users.remove(userId);
+        this.userIdFromSession.remove(user.getSession());
 
         for (int roomId : user.getJoinedRoomIds()) {
             ChatRoom chatRoom = this.rooms.get(roomId);
             chatRoom.removeUser(user, user.getName() + " closed the session.");
         }
-        this.users.remove(userId);
+
         deleteObserver(user);
     }
 
@@ -194,16 +200,11 @@ public class DispatcherAdapter extends Observable {
      * @param roomId the id of the chat room to be removed
      */
     public void unloadRoom(int roomId) {
-        ChatRoom chatRoom = rooms.get(roomId);
-        for (int userId : chatRoom.getUsers().keySet()) {
-            User curUser = users.get(userId);
-            curUser.removeRoom(chatRoom);
-            UserRoomResponse userRoomResponse = new UserRoomResponse(userId,
-                    curUser.getJoinedRoomIds(), curUser.getAvailableRoomIds());
-            notifyClient(curUser, userRoomResponse);
-        }
-        rooms.remove(roomId);
-        return;
+        RemoveRoomCmd removeRoomCmd = new RemoveRoomCmd(this.rooms.get(roomId));
+        setChanged();
+        notifyObservers(removeRoomCmd);
+
+        this.rooms.remove(roomId);
     }
 
     /**
@@ -241,12 +242,6 @@ public class DispatcherAdapter extends Observable {
             ChatRoom chatRoom = this.rooms.get(roomId);
             User user = this.users.get(userIdFromSession.get(session));
             chatRoom.removeUser(user, user.getName() + " left the room.");
-
-            // if the user is owner, unload the chat room
-            if (user.getId() == chatRoom.getOwner().getId()) {
-                unloadRoom(chatRoom.getId());
-            }
-
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());

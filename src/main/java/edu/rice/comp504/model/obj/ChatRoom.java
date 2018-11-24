@@ -3,6 +3,7 @@ package edu.rice.comp504.model.obj;
 import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
+import edu.rice.comp504.model.cmd.RemoveRoomCmd;
 import edu.rice.comp504.model.res.RoomNotificationResponse;
 import edu.rice.comp504.model.res.RoomUsersResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
@@ -181,6 +182,11 @@ public class ChatRoom extends Observable {
             LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(this, user);
             setChanged();
             notifyObservers(leaveRoomCmd);
+
+            // if the user is owner, unload the chat room
+            if (user == this.owner) {
+                this.dis.unloadRoom(this.id);
+            }
 
             deleteObserver(user);
 
