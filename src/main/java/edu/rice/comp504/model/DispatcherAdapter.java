@@ -84,12 +84,15 @@ public class DispatcherAdapter extends Observable {
      * @return the new user that has been loaded
      */
     public User loadUser(Session session, String body) {
+        // parse the body
         JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
         String name = jo.get("name").getAsString();
         int age = jo.get("age").getAsInt();
         String location = jo.get("location").getAsString();
         String school = jo.get("school").getAsString();
+        // create user
         User newUser = new User(nextUserId, session, name, age, location, school, null);
+        // check if the user is valid to join the room
         for (int i = 0; i < rooms.size(); i++) {
             if (rooms.get(i).applyFilter(newUser)) {
                 newUser.addRoom(rooms.get(i));
@@ -98,8 +101,11 @@ public class DispatcherAdapter extends Observable {
         addObserver(newUser);
         userIdFromSession.put(session, nextUserId);
         users.put(nextUserId, newUser);
+        // create response
         NewUserResponse newUserResponse = new NewUserResponse("NewUser", nextUserId, name);
+        // notify the user
         notifyClient(newUser, newUserResponse);
+        // increase nextUserId
         nextUserId++;
         return newUser;
     }
@@ -309,6 +315,48 @@ public class DispatcherAdapter extends Observable {
         //get receivers
         User owner = chatRoom.getOwner();
         Map<Integer, String> receivers = new HashMap<>();
+
+        //check if message has word "hate"
+        int result = rawMessage.indexOf("hate");
+        boolean illegalMessage = false;
+        if(result >= 0){
+            illegalMessage = true;
+        }
+
+        //if the message content is illegal, quit user from all chatRooms
+        if(illegalMessage){
+            //leave all joined room
+            for (int i = 0; i < sender.getJoinedRoomIds().size(); i++) {
+                LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(rooms.get(sender.getJoinedRoomIds().get(i)), sender, "illegal message");
+                leaveRoomCmd.execute(sender);
+
+                Map<Integer, String> notifyUsers = chatRoom.getUsers();
+
+                //notification response
+                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
+                //roomuserlist response
+                RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
+
+                Iterator it = notifyUsers.entrySet().iterator();
+
+                while (it.hasNext()) {
+                    Map.Entry pair = (Map.Entry)it.next();
+                    User tempUser = users.get(pair.getKey());
+                    notifyClient(tempUser, roomUsersResponse);
+                    notifyClient(tempUser, roomNotificationResponse);
+                }
+            }
+
+            //remove all room from available room list
+            for(int i = 0; i < sender.getAvailableRoomIds().size(); i++){
+                sender.removeRoom(rooms.get(sender.getAvailableRoomIds().get(i)));
+            }
+
+            //userrooomlist response
+            UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), sender.getJoinedRoomIds(), sender.getAvailableRoomIds());
+            notifyClient(sender, userRoomResponse);
+
+        }
 
         if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
             receivers = chatRoom.getUsers();
