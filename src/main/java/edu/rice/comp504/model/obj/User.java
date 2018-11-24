@@ -131,7 +131,9 @@ public class User implements Observer {
      * @param room the chat room object
      * */
     public void removeRoom(ChatRoom room) {
-
+        int roomId = room.getId();
+        this.availableRoomIds.remove(Integer.valueOf(roomId));
+        this.joinedRoomIds.remove(Integer.valueOf(roomId));
     }
 
     /**
