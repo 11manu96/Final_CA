@@ -42,10 +42,10 @@ function logIn() {
     var userSchool = $("#user-school").val();
 
     console.log(userLocation + userSchool);
-    if (userName == ""){
-        document.getElementById("user-name").addClass("error")
-    }else if (userAge == ""){
-        document.getElementById("user-age").addClass("error")
+    if (userName == "") {
+        $("#user-name").addClass("error")
+    }else if (userAge == "") {
+        $("#user-age").addClass("error")
     }else{
         webSocket.send(JSON.stringify({"type": "login", "body":
                 {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
@@ -61,7 +61,7 @@ function logIn() {
  */
 function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val();
-    if(selectedRoom.length > 1){
+    if (selectedRoom.length > 1) {
         $("#slt-joined-rooms").addClass("error")
     }else {
         currentRoom = selectedRoom;
@@ -108,7 +108,7 @@ function exitAllRooms() {
 function joinRoom() {
 
     var selectedRoom = $("#slt-available-rooms").val();
-    if(selectedRoom.length > 1){
+    if (selectedRoom.length > 1) {
         $("#slt-available-rooms").addClass("error")
     }else{
         currentRoom = selectedRoom;
@@ -127,11 +127,11 @@ function createRoom() {
     var roomLocations = $("#slt-room-location").val();
     var roomSchools = $("#slt-room-school").val();
 
-    if (roomName == ""){
+    if (roomName == "") {
         $("#room-name").addClass("error")
-    }else if (roomMinAge == ""){
+    }else if (roomMinAge == "") {
         $("#room-min-age").addClass("error")
-    }else if (roomMaxAge == ""){
+    }else if (roomMaxAge == "") {
         $("#room-max-age").addClass("error")
     }else{
         //console.log(roomMinAge)
