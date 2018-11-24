@@ -188,7 +188,7 @@ public class DispatcherAdapter extends Observable {
 
         for (int roomId : user.getJoinedRoomIds()) {
             ChatRoom chatRoom = this.rooms.get(roomId);
-            chatRoom.removeUser(user, user.getName() + " closed the session.");
+            chatRoom.removeUser(user, user.getName() + " closed the session");
         }
 
         deleteObserver(user);
@@ -237,11 +237,19 @@ public class DispatcherAdapter extends Observable {
         try {
             // parse body
             JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-            int roomId = jo.get("roomId").getAsInt();
 
-            ChatRoom chatRoom = this.rooms.get(roomId);
             User user = this.users.get(userIdFromSession.get(session));
-            chatRoom.removeUser(user, user.getName() + " left the room.");
+            if (jo.get("roomId").getAsString().equals("All")) {
+                List<Integer> joinedRooms = new ArrayList<>(user.getJoinedRoomIds());
+                for (int roomId : joinedRooms) {
+                    ChatRoom chatRoom = this.rooms.get(roomId);
+                    chatRoom.removeUser(user, user.getName() + " left " + chatRoom.getName());
+                }
+            } else {
+                int roomId = jo.get("roomId").getAsInt();
+                ChatRoom chatRoom = this.rooms.get(roomId);
+                chatRoom.removeUser(user, user.getName() + " left " + chatRoom.getName());
+            }
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());
@@ -286,7 +294,8 @@ public class DispatcherAdapter extends Observable {
             if (rawMessage.contains("hate")) {
                 // leave all joined room
                 for (int removeRoomId : sender.getJoinedRoomIds()) {
-                    rooms.get(removeRoomId).removeUser(sender, sender.getName() + " was kicked for an illegal message");
+                    ChatRoom removeRoom = rooms.get(removeRoomId);
+                    removeRoom.removeUser(sender, sender.getName() + " was kicked from " + removeRoom.getName());
                 }
 
                 // remove all room from available room list
@@ -299,7 +308,7 @@ public class DispatcherAdapter extends Observable {
             } else {
                 if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
                     receivers = chatRoom.getUsers();
-                    receivers.remove(Integer.valueOf(senderId));
+                    receivers.remove(senderId);
 
                 } else {
                     int receiverId = jo.get("receiverId").getAsInt();
