@@ -7,6 +7,7 @@ import com.google.gson.*;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import edu.rice.comp504.model.cmd.AddRoomCmd;
+import edu.rice.comp504.model.cmd.RemoveRoomCmd;
 import org.eclipse.jetty.websocket.api.Session;
 
 import edu.rice.comp504.model.obj.ChatRoom;
@@ -83,36 +84,43 @@ public class DispatcherAdapter extends Observable {
      * @return the new user that has been loaded
      */
     public User loadUser(Session session, String body) {
-        // parse body
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        String name = jo.get("name").getAsString();
-        int age = jo.get("age").getAsInt();
-        String location = jo.get("location").getAsString();
-        String school = jo.get("school").getAsString();
+        try {
+            // parse body
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            String name = jo.get("name").getAsString();
+            int age = jo.get("age").getAsInt();
+            String location = jo.get("location").getAsString();
+            String school = jo.get("school").getAsString();
 
-        // create user
-        newSession(session);
-        User newUser = new User(getUserIdFromSession(session), session, name, age, location, school, null);
+            // create user
+            newSession(session);
+            User newUser = new User(getUserIdFromSession(session), session, name, age, location, school, null);
 
-        // check rooms available to user
-        for (ChatRoom room : rooms.values()) {
-            if (room.applyFilter(newUser)) {
-                newUser.addRoom(room);
+            // check rooms available to user
+            for (ChatRoom room : rooms.values()) {
+                // send new user all existing room mappings
+                DispatcherAdapter.notifyClient(session, new NewRoomResponse(room.getId(),
+                        room.getName(), room.getOwner().getId()));
+                if (room.applyFilter(newUser)) {
+                    newUser.addRoom(room);
+                }
             }
+
+            // add user object to lookup and observers
+            users.put(newUser.getId(), newUser);
+            addObserver(newUser);
+
+            // send responses to new user
+            notifyClient(session, new NewUserResponse(newUser.getId(), name));
+            notifyClient(session, new UserRoomResponse(newUser.getId(), newUser.getJoinedRoomIds(),
+                    newUser.getAvailableRoomIds()));
+
+            return newUser;
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifyClient(session, new NullResponse());
+            return null;
         }
-
-        // add user object to lookup and observers
-        users.put(newUser.getId(), newUser);
-        addObserver(newUser);
-
-        // send responses to new user
-        NewUserResponse newUserResponse = new NewUserResponse(newUser.getId(), name);
-        notifyClient(newUser, newUserResponse);
-        UserRoomResponse userRoomResponse = new UserRoomResponse(newUser.getId(), newUser.getJoinedRoomIds(),
-                newUser.getAvailableRoomIds());
-        notifyClient(newUser, userRoomResponse);
-
-        return newUser;
     }
 
     /**
@@ -123,41 +131,47 @@ public class DispatcherAdapter extends Observable {
      * @return the new room that has been loaded
      */
     public ChatRoom loadRoom(Session session, String body) {
-        // parse body
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        String roomName = jo.get("roomName").getAsString();
-        int ageLower = jo.get("ageLower").getAsInt();
-        int ageUpper = jo.get("ageUpper").getAsInt();
-        String[] locations = new String[((JsonArray) jo.get("location")).size()];
-        String[] schools = new String[((JsonArray) jo.get("school")).size()];
-        for (int i = 0; i < ((JsonArray) jo.get("location")).size(); i++) {
-            locations[i] = ((JsonArray) jo.get("location")).get(i).getAsString();
-        }
-        for (int i = 0; i < ((JsonArray) jo.get("school")).size(); i++) {
-            schools[i] = ((JsonArray) jo.get("school")).get(i).getAsString();
-        }
+        try {
+            // parse body
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            String roomName = jo.get("roomName").getAsString();
+            int ageLower = jo.get("ageLower").getAsInt();
+            int ageUpper = jo.get("ageUpper").getAsInt();
+            String[] locations = new String[((JsonArray) jo.get("location")).size()];
+            String[] schools = new String[((JsonArray) jo.get("school")).size()];
+            for (int i = 0; i < ((JsonArray) jo.get("location")).size(); i++) {
+                locations[i] = ((JsonArray) jo.get("location")).get(i).getAsString();
+            }
+            for (int i = 0; i < ((JsonArray) jo.get("school")).size(); i++) {
+                schools[i] = ((JsonArray) jo.get("school")).get(i).getAsString();
+            }
 
-        // get owner
+            // get owner
 
-        int ownerId = getUserIdFromSession(session);
-        User owner = this.users.get(ownerId);
+            int ownerId = getUserIdFromSession(session);
+            User owner = this.users.get(ownerId);
 
-        // create chat room
-        ChatRoom newRoom = new ChatRoom(this.nextRoomId++, roomName, owner, ageLower, ageUpper,
-                locations, schools, this);
+            // create chat room
+            ChatRoom newRoom = new ChatRoom(this.nextRoomId++, roomName, owner, ageLower, ageUpper,
+                    locations, schools, this);
 
-        // check if the owner is eligible to join the room
-        if (newRoom.applyFilter(owner)) {
-            // add room to all rooms list
-            this.rooms.put(newRoom.getId(), newRoom);
+            // check if the owner is eligible to join the room
+            if (newRoom.applyFilter(owner)) {
+                // add room to all rooms list
+                this.rooms.put(newRoom.getId(), newRoom);
 
-            AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
-            setChanged();
-            notifyObservers(addRoomCmd);
+                AddRoomCmd addRoomCmd = new AddRoomCmd(newRoom);
+                setChanged();
+                notifyObservers(addRoomCmd);
 
-            return newRoom;
-        } else {
-            // TODO: notify the owner he is invalid
+                return newRoom;
+            } else {
+                // TODO: notify the owner he is invalid
+                return null;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifyClient(session, new NullResponse());
             return null;
         }
     }
@@ -169,12 +183,14 @@ public class DispatcherAdapter extends Observable {
      */
     public void unloadUser(int userId) {
         User user = this.users.get(userId);
+        this.users.remove(userId);
+        this.userIdFromSession.remove(user.getSession());
 
         for (int roomId : user.getJoinedRoomIds()) {
             ChatRoom chatRoom = this.rooms.get(roomId);
             chatRoom.removeUser(user, user.getName() + " closed the session.");
         }
-        this.users.remove(userId);
+
         deleteObserver(user);
     }
 
@@ -184,7 +200,11 @@ public class DispatcherAdapter extends Observable {
      * @param roomId the id of the chat room to be removed
      */
     public void unloadRoom(int roomId) {
+        RemoveRoomCmd removeRoomCmd = new RemoveRoomCmd(this.rooms.get(roomId));
+        setChanged();
+        notifyObservers(removeRoomCmd);
 
+        this.rooms.remove(roomId);
     }
 
     /**
@@ -194,12 +214,17 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "roomId"
      */
     public void joinRoom(Session session, String body) {
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        int roomId = jo.get("roomId").getAsInt();
+        try {
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            int roomId = jo.get("roomId").getAsInt();
 
-        ChatRoom chatRoom = this.rooms.get(roomId);
-        User user = this.users.get(getUserIdFromSession(session));
-        chatRoom.addUser(user);
+            ChatRoom chatRoom = this.rooms.get(roomId);
+            User user = this.users.get(getUserIdFromSession(session));
+            chatRoom.addUser(user);
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifyClient(session, new NullResponse());
+        }
     }
 
     /**
@@ -253,96 +278,66 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "roomId receiverId rawMessage"
      */
     public void sendMessage(Session session, String body) {
-        //parse the body
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        int roomId = jo.get("roomId").getAsInt();
-        String rawMessage = jo.get("message").getAsString();
+        try {
+            // parse the body
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            int roomId = jo.get("roomId").getAsInt();
+            String rawMessage = jo.get("message").getAsString();
 
-        //get the sender
-        int senderId = userIdFromSession.get(session);
-        User sender = users.get(senderId);
+            // get the sender
+            int senderId = userIdFromSession.get(session);
+            User sender = users.get(senderId);
 
-        //get the charRoom
-        ChatRoom chatRoom = rooms.get(roomId);
+            // get the chatRoom
+            ChatRoom chatRoom = rooms.get(roomId);
 
-        //get receivers
-        User owner = chatRoom.getOwner();
-        Map<Integer, String> receivers = new HashMap<>();
+            // get receivers
+            User owner = chatRoom.getOwner();
+            Map<Integer, String> receivers = new HashMap<>();
 
-        //check if message has word "hate"
-        int result = rawMessage.indexOf("hate");
-        boolean illegalMessage = false;
-        if (result >= 0) {
-            illegalMessage = true;
-        }
-
-        //if the message content is illegal, quit user from all chatRooms
-        if (illegalMessage) {
-            //leave all joined room
-            for (int i : sender.getJoinedRoomIds()) {
-                rooms.get(i).removeUser(sender, sender.getName()+"illegal message");
-                sender.moveToAvailable(chatRoom);
-
-
-                //notification response
-                RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(rooms.get(i).getNotifications());
-                //roomuserlist response
-                RoomUsersResponse roomUsersResponse = new RoomUsersResponse(rooms.get(i).getId(), rooms.get(i).getUsers());
-
-                // notify all users in room
-                for (Map.Entry pair : chatRoom.getUsers().entrySet()) {
-                    User notifyUser = this.users.get(pair.getKey());
-                    notifyClient(notifyUser, roomUsersResponse);
-                    notifyClient(notifyUser, roomNotificationResponse);
+            // if the message content is illegal, quit user from all chatRooms
+            if (rawMessage.contains("hate")) {
+                // leave all joined room
+                for (int removeRoomId : sender.getJoinedRoomIds()) {
+                    rooms.get(removeRoomId).removeUser(sender, sender.getName() + " was kicked for an illegal message");
                 }
 
+                // remove all room from available room list
+                for (int removeRoomId : sender.getAvailableRoomIds()) {
+                    sender.removeRoom(rooms.get(removeRoomId));
+                }
+
+                // userrooomlist response
+                notifyClient(sender, new UserRoomResponse(senderId, sender.getJoinedRoomIds(), sender.getAvailableRoomIds()));
+            } else {
+                if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
+                    receivers = chatRoom.getUsers();
+                    receivers.remove(Integer.valueOf(senderId));
+
+                } else {
+                    int receiverId = jo.get("receiverId").getAsInt();
+                    receivers.put(receiverId, this.users.get(receiverId).getName());
+                }
+
+                // send message
+                for (int receiverId : receivers.keySet()) {
+                    // get the receiver
+                    User receiver = users.get(receiverId);
+
+                    // construct the message
+                    Message message = new Message(nextMessageId++, roomId, senderId, receiverId, rawMessage);
+
+                    // store the message
+                    chatRoom.storeMessage(sender, receiver, message);
+
+                    //response
+                    notifyClient(receiver, new UserChatHistoryResponse(getChatHistory(roomId, senderId, receiverId)));
+                    notifyClient(sender, new UserChatHistoryResponse(getChatHistory(roomId, senderId, receiverId)));
+                }
             }
-
-            //remove all room from available room list
-            for (int i : sender.getAvailableRoomIds()) {
-                sender.removeRoom(rooms.get(i));
-            }
-
-            //userrooomlist response
-            UserRoomResponse userRoomResponse = new UserRoomResponse(userIdFromSession.get(session),
-                    sender.getJoinedRoomIds(), sender.getAvailableRoomIds());
-            notifyClient(sender, userRoomResponse);
-
-        }
-
-        if (sender == owner && jo.get("receiverId").getAsString().equals("All")) {
-            receivers = chatRoom.getUsers();
-
-        } else {
-            int receiverId = jo.get("receiverId").getAsInt();
-            receivers.put(receiverId, users.get(receiverId).getName());
-        }
-
-        //send message
-        for (Map.Entry<Integer, String> entry : receivers.entrySet()) {
-
-            //get the receiver
-            int receiverId = entry.getKey();
-            User receiver = users.get(receiverId);
-
-            if (receiver == sender)//when the owner sends to all users, won't send to himself
-                continue;
-
-            //construct the message
-            Message message = new Message(nextMessageId, roomId, senderId, receiverId, rawMessage);
-            nextMessageId++;
-
-            //store the message
-            chatRoom.storeMessage(sender, receiver, message);
-
-            //get the chatHistory
-            List<Message> chatHistory = getChatHistory(roomId, senderId, receiverId);
-            chatHistory.add(message);
-
-            //response
-            UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse(chatHistory);
-            notifyClient(receiver, userChatHistoryResponse);
-
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifyClient(session, new NullResponse());
         }
     }
 
@@ -363,18 +358,30 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "type roomId [senderId] [receiverId]"
      */
     public void query(Session session, String body) {
-        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
-        String query = jo.get("query").getAsString();
+        try {
+            JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+            String query = jo.get("query").getAsString();
 
-        switch (query) {
-            case "roomUsers":
-                int roomId = jo.get("roomId").getAsInt();
-                ChatRoom chatRoom = this.rooms.get(roomId);
-                RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
-                notifyClient(session, roomUsersResponse);
-                break;
-            default:
-                break;
+            switch (query) {
+                case "roomUsers":
+                    int roomId = jo.get("roomId").getAsInt();
+                    ChatRoom chatRoom = this.rooms.get(roomId);
+                    RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
+                    notifyClient(session, roomUsersResponse);
+                    break;
+                case "userChatHistory":
+                    roomId = jo.get("roomId").getAsInt();
+                    int otherUserId = jo.get("otherUserId").getAsInt();
+                    UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse(
+                            getChatHistory(roomId, getUserIdFromSession(session), otherUserId));
+                    notifyClient(session, userChatHistoryResponse);
+                    break;
+                default:
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            notifyClient(session, new NullResponse());
         }
     }
 
@@ -445,7 +452,6 @@ public class DispatcherAdapter extends Observable {
         for (Map.Entry<String, List<Message>> entry : chatHistory.entrySet()) {
             if (entry.getKey().equals(combineId))
                 return entry.getValue();
-
         }
 
         return null;

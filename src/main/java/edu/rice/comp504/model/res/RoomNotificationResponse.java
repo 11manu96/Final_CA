@@ -6,7 +6,7 @@ public class RoomNotificationResponse extends AResponse {
     private int roomid;
     private List<String> notifications;
     public RoomNotificationResponse(List<String> notifications) {
-        super("RoomNotificationsResponse");
+        super("RoomNotifications");
         this.notifications = notifications;
     }
 }

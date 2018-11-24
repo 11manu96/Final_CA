@@ -10,7 +10,7 @@ public class NewRoomResponse extends AResponse {
     private int ownerId;
 
     public NewRoomResponse(int roomId, String roomName, int ownerId) {
-        super("NewRoomResponse");
+        super("NewRoom");
         this.roomId = roomId;
         this.roomName = roomName;
         this.ownerId = ownerId;

@@ -3,6 +3,7 @@ package edu.rice.comp504.model.obj;
 import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
+import edu.rice.comp504.model.cmd.RemoveRoomCmd;
 import edu.rice.comp504.model.res.RoomNotificationResponse;
 import edu.rice.comp504.model.res.RoomUsersResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
@@ -174,7 +175,6 @@ public class ChatRoom extends Observable {
         int userid = user.getId();
         if (this.userNameFromUserId.containsKey(userid)) {
             this.userNameFromUserId.remove(userid);
-            deleteObserver(user);
             user.moveToAvailable(this);
 
             this.notifications.add(reason);
@@ -182,6 +182,13 @@ public class ChatRoom extends Observable {
             LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(this, user);
             setChanged();
             notifyObservers(leaveRoomCmd);
+
+            // if the user is owner, unload the chat room
+            if (user == this.owner) {
+                this.dis.unloadRoom(this.id);
+            }
+
+            deleteObserver(user);
 
             return true;
         }
@@ -193,7 +200,15 @@ public class ChatRoom extends Observable {
      * Map the single message body with key value (senderID&receiverID)
      */
     public void storeMessage(User sender, User receiver, Message message) {
+        int userAId = sender.getId();
+        int userBId = receiver.getId();
+        String combineId = userAId < userBId ?
+                String.valueOf(userAId) + String.valueOf(userBId) : String.valueOf(userBId) + String.valueOf(userAId);
 
+        if (!this.chatHistory.containsKey(combineId)) {
+            this.chatHistory.put(combineId, new ArrayList<>());
+        }
+        this.chatHistory.get(combineId).add(message);
     }
 
     /**

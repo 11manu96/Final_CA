@@ -19,16 +19,19 @@ public class LeaveRoomCmd implements IUserCmd {
 
     @Override
     public void execute(User context) {
-        // if this user is leaving, then update rooms lists
-        if (this.user == context) {
-            UserRoomResponse userRoomResponse = new UserRoomResponse(this.user.getId(),
-                    this.user.getJoinedRoomIds(), this.user.getAvailableRoomIds());
-            DispatcherAdapter.notifyClient(context, userRoomResponse);
+        // only send message to live sessions
+        if (this.chatRoom.getDispatcher().containsSession(context.getSession())) {
+            // if this user is joining, then update rooms lists
+            if (this.user == context) {
+                UserRoomResponse userRoomResponse = new UserRoomResponse(this.user.getId(),
+                        this.user.getJoinedRoomIds(), this.user.getAvailableRoomIds());
+                DispatcherAdapter.notifyClient(context, userRoomResponse);
+            }
+            // all users update room users list
+            RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getNotifications());
+            RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
+            DispatcherAdapter.notifyClient(context, roomNotificationResponse);
+            DispatcherAdapter.notifyClient(context, roomUsersResponse);
         }
-        // all users update room users list
-        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getNotifications());
-        RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
-        DispatcherAdapter.notifyClient(context, roomNotificationResponse);
-        DispatcherAdapter.notifyClient(context, roomUsersResponse);
     }
 }
