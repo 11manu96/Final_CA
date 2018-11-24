@@ -180,7 +180,16 @@ public class DispatcherAdapter extends Observable {
      * @param roomId the id of the chat room to be removed
      */
     public void unloadRoom(int roomId) {
-
+        ChatRoom chatRoom = rooms.get(roomId);
+        for (int userId : chatRoom.getUsers().keySet()) {
+            User curUser = users.get(userId);
+            curUser.removeRoom(chatRoom);
+            UserRoomResponse userRoomResponse = new UserRoomResponse("UserRoom", userId,
+                    curUser.getJoinedRoomIds(), curUser.getAvailableRoomIds());
+            notifyClient(curUser, userRoomResponse);
+        }
+        rooms.remove(roomId);
+        return;
     }
 
     /**
@@ -257,13 +266,12 @@ public class DispatcherAdapter extends Observable {
         UserRoomResponse userRoomResponse = new UserRoomResponse("UserRooms", userIdFromSession.get(session), user.getJoinedRoomIds(), user.getAvailableRoomIds());
         notifyClient(user, userRoomResponse);
 
-        Map<Integer, String> notifyUsers = chatRoom.getUsers();
-
         //notification response
         RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse("RoomNotifications", chatRoom.getNotifications());
         //roomuserlist response
         RoomUsersResponse roomUsersResponse = new RoomUsersResponse("RoomUsers", chatRoom.getId(), chatRoom.getUsers());
 
+        Map<Integer, String> notifyUsers = chatRoom.getUsers();
         Iterator it = notifyUsers.entrySet().iterator();
 
         while (it.hasNext()) {
@@ -273,7 +281,10 @@ public class DispatcherAdapter extends Observable {
             notifyClient(tempUser, roomNotificationResponse);
         }
 
-
+        // if the user is owner, unload the chat room
+        if (user.getId() == chatRoom.getOwner().getId()) {
+            unloadRoom(chatRoom.getId());
+        }
 
     }
 
