@@ -138,6 +138,7 @@ public class DispatcherAdapter extends Observable {
         }
 
         // get owner
+
         int ownerId = getUserIdFromSession(session);
         User owner = this.users.get(ownerId);
 

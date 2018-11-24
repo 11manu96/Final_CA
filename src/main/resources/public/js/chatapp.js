@@ -3,6 +3,8 @@
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
 var loggedIn = false;
 var currentRoom = null;
+var userNames = {};
+var roomNames = {};
 
 /**
  * Entry point into chat room
@@ -40,7 +42,6 @@ function logIn() {
  */
 function enterRoom() {
     var selectedRoom = $("#slt-joined-rooms").val()[0];
-    currentRoom = selectedRoom;
     webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
 }
 
@@ -118,8 +119,6 @@ function updateChatApp(message) {
     var responseBody = JSON.parse(message.data);
     console.log(responseBody);
     if (responseBody.type === "UserRoomResponse") {
-        // login, create room, join room, exit room
-
         // enable buttons
         if (loggedIn === false) {
             loggedIn = true;
@@ -128,6 +127,7 @@ function updateChatApp(message) {
         }
         $("#slt-joined-rooms").empty();
         $("#slt-available-rooms").empty();
+
         // need to get room name somehow
         responseBody.joinedRoomIds.forEach(function(roomId) {
             $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
@@ -136,7 +136,16 @@ function updateChatApp(message) {
             $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         });
     } else if (responseBody.type === "RoomUsersResponse") {
-        console.log(responseBody.users);
-        console.log(responseBody.users[0])
+        $("#slt-room-users").empty();
+        var userList  = responseBody.users;
+        Object.keys(userList).map(function(key) {
+            $("#slt-room-users").append($("<option class='opt-room-user'></option>").attr("value", Number(key)).text(userList[key]))
+        });
+        $("#room-title").text(roomNames[responseBody.roomId].name + " - Owned by " + roomNames[responseBody.roomId].owner);
+        currentRoom = responseBody.roomId;
+    } else if (responseBody.type === "NewUserResponse") {
+        userNames[responseBody.userId] = responseBody.userName;
+    } else if (responseBody.type === "NewRoomResponse") {
+        roomNames[responseBody.roomId] = {"name": responseBody.roomName, "owner": userNames[responseBody.ownerId]};
     }
 }
