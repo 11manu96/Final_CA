@@ -175,27 +175,29 @@ public class DispatcherAdapter extends Observable {
      * @param userId the id of the user to be removed
      */
     public void unloadUser(int userId) {
-        User user = users.get(userId);
-        String reason = user.getName() + "closes the session.";
+        User user = this.users.get(userId);
+        String reason = user.getName() + "closed the session.";
 
         List<Integer> joinedRoomIds = user.getJoinedRoomIds();
-        for (int i = 0; i < joinedRoomIds.size(); i++) {
-            int roomId = joinedRoomIds.get(i);
-            ChatRoom chatRoom = rooms.get(roomId);
+        for (int roomId : joinedRoomIds) {
+            ChatRoom chatRoom = this.rooms.get(roomId);
 
-            //leave room
+            // leave room
             chatRoom.removeUser(user, reason);
 
-            //notification response
+            // notification response
             RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(chatRoom.getNotifications());
-            notifyClient(user, roomNotificationResponse);
 
-            //roomuserlist response
+            // roomuserlist response
             RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
-            notifyClient(user, roomUsersResponse);
 
+            // notify all users in room
+            for (Map.Entry pair : chatRoom.getUsers().entrySet()) {
+                User notifyUser = this.users.get(pair.getKey());
+                notifyClient(notifyUser, roomUsersResponse);
+                notifyClient(notifyUser, roomNotificationResponse);
+            }
         }
-
         users.remove(userId);
     }
 
@@ -378,7 +380,19 @@ public class DispatcherAdapter extends Observable {
      * @param body    of format "type roomId [senderId] [receiverId]"
      */
     public void query(Session session, String body) {
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+        String query = jo.get("query").getAsString();
 
+        switch (query) {
+            case "roomUsers":
+                int roomId = jo.get("roomId").getAsInt();
+                ChatRoom chatRoom = this.rooms.get(roomId);
+                RoomUsersResponse roomUsersResponse = new RoomUsersResponse(chatRoom.getId(), chatRoom.getUsers());
+                notifyClient(session, roomUsersResponse);
+                break;
+            default:
+                break;
+        }
     }
 
     /**

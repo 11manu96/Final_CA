@@ -54,6 +54,10 @@ public class WebSocketController {
                 break;
             case "leave":
                 dis.leaveRoom(user, message);
+                break;
+            case "query":
+                dis.query(user, message);
+                break;
             default:
                 break;
         }
@@ -70,7 +74,5 @@ public class WebSocketController {
 
         int userId = dis.getUserIdFromSession(user);
         dis.unloadUser(userId);
-
     }
-
 }

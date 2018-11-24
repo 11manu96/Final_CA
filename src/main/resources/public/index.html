@@ -30,31 +30,39 @@
                 <div>
                     <h3>Chat Rooms</h3>
                 </div>
-                <div class="fill-row">
-                    <div class="third-box">
-                        <select id="slt-joined-rooms" multiple size="10" class="full-width">
-                        </select>
-                    </div>
-                    <div class="fill-box">
-                        <div class="center-box">
-                            <button id="btn-enter" class="logged-in" disabled>Enter Room</button>
-                        </div>
-                        <div class="center-box">
-                            <button id="btn-exit" class="logged-in" disabled>Exit Room</button>
-                        </div>
-                        <div class="center-box">
-                            <button id="btn-exit-all" class="logged-in" disabled>Exit All</button>
-                        </div>
-                        <hr>
-                        <div class="center-box">
-                            <button id="btn-join" class="logged-in" disabled>Join Room</button>
-                        </div>
-                    </div>
-                    <div class="third-box">
-                        <select id="slt-available-rooms" multiple size="10" class="full-width">
-                        </select>
-                    </div>
-                </div>
+                <table class="full-width">
+                    <tr>
+                        <td class="third-box">Joined</td>
+                        <td></td>
+                        <td class="third-box">Available</td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <select id="slt-joined-rooms" multiple size="10" class="full-width">
+                            </select>
+                        </td>
+                        <td>
+                            <div class="center-box">
+                                <button id="btn-enter" class="logged-in" disabled>Enter Room</button>
+                            </div>
+                            <div class="center-box">
+                                <button id="btn-exit" class="logged-in" disabled>Exit Room</button>
+                            </div>
+                            <div class="center-box">
+                                <button id="btn-exit-all" class="logged-in" disabled>Exit All</button>
+                            </div>
+                            <hr>
+                            <div class="center-box">
+                                <button id="btn-join" class="logged-in" disabled>Join Room</button>
+                            </div>
+                        </td>
+                        <td>
+                            <select id="slt-available-rooms" multiple size="10" class="full-width">
+                            </select>
+                        </td>
+                    </tr>
+                </table>
+
             </div>
             <div class="padded-box">
                 <div>
@@ -77,9 +85,14 @@
                     <tr>
                         <td>Locations:</td>
                         <td>
-                            <select id="slt-room-location" multiple size="5" class="full-width">
+                            <select id="slt-room-location" multiple size="7" class="full-width">
                                 <option>North America</option>
+                                <option>South America</option>
+                                <option>Europe</option>
+                                <option>Africa</option>
                                 <option>Asia</option>
+                                <option>Australia</option>
+                                <option>Antarctica</option>
                             </select>
                         </td>
                     </tr>
@@ -90,6 +103,8 @@
                                 <option>Rice</option>
                                 <option>Harvard</option>
                                 <option>Duke</option>
+                                <option>Nanjing</option>
+                                <option>Wuhan</option>
                             </select>
                         </td>
                     </tr>
@@ -106,9 +121,6 @@
             <div class="fill-row fill-box">
                 <div class="fifth-box">
                     <select id="slt-room-users" multiple size="20" class="full-width full-height">
-                        <option class="opt-room-user">User 1</option>
-                        <option class="opt-room-user">User 2</option>
-                        <option class="opt-room-user">User 3</option>
                     </select>
                 </div>
                 <div class="fill-col fill-box">

@@ -39,8 +39,9 @@ function logIn() {
  * Send request to websocket to enter room
  */
 function enterRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val();
+    var selectedRoom = $("#slt-joined-rooms").val()[0];
     currentRoom = selectedRoom;
+    webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
 }
 
 /**
@@ -134,5 +135,8 @@ function updateChatApp(message) {
         responseBody.availableRoomIds.forEach(function(roomId) {
             $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
         });
+    } else if (responseBody.type === "RoomUsersResponse") {
+        console.log(responseBody.users);
+        console.log(responseBody.users[0])
     }
 }
