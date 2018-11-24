@@ -140,13 +140,23 @@ function loadRoomLists(responseBody) {
     $("#slt-joined-rooms").empty();
     $("#slt-available-rooms").empty();
 
-    // need to get room name somehow
+    var exitCurrentRoom = true;
+
     responseBody.joinedRoomIds.forEach(function (roomId) {
+        if (currentRoom == roomId) {
+            exitCurrentRoom = false;
+        }
         $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
     });
     responseBody.availableRoomIds.forEach(function (roomId) {
         $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text(roomNames[roomId].name));
     });
+
+    // if room is gone for any reason exit room
+    if (exitCurrentRoom) {
+        currentRoom = null;
+        clearRoomUI();
+    }
 }
 
 
