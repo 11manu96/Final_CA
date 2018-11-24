@@ -97,6 +97,9 @@ public class DispatcherAdapter extends Observable {
 
             // check rooms available to user
             for (ChatRoom room : rooms.values()) {
+                // send new user all existing room mappings
+                DispatcherAdapter.notifyClient(session, new NewRoomResponse(room.getId(),
+                        room.getName(), room.getOwner().getId()));
                 if (room.applyFilter(newUser)) {
                     newUser.addRoom(room);
                 }
