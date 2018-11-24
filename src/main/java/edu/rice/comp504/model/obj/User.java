@@ -45,8 +45,11 @@ public class User implements Observer {
         this.joinedRoomIds = new LinkedList<>();
         this.availableRoomIds = new LinkedList<>();
 
-        for (ChatRoom room : rooms) {
-            this.availableRoomIds.add(room.getId());
+        // only initialize available rooms if rooms are provided
+        if (rooms != null) {
+            for (ChatRoom room : rooms) {
+                this.availableRoomIds.add(room.getId());
+            }
         }
     }
 
@@ -129,8 +132,8 @@ public class User implements Observer {
      * */
     public void removeRoom(ChatRoom room) {
         int roomId = room.getId();
-        this.availableRoomIds.remove(roomId);
-        this.joinedRoomIds.remove(roomId);
+        this.availableRoomIds.remove(Integer.valueOf(roomId));
+        this.joinedRoomIds.remove(Integer.valueOf(roomId));
     }
 
     /**
@@ -139,7 +142,7 @@ public class User implements Observer {
      * */
     public void moveToJoined(ChatRoom room) {
         int roomId = room.getId();
-        this.availableRoomIds.remove(roomId);
+        this.availableRoomIds.remove(Integer.valueOf(roomId));
         this.joinedRoomIds.add(roomId);
     }
 
@@ -148,9 +151,9 @@ public class User implements Observer {
      * @param room the chat room object
      * */
     public void moveToAvailable(ChatRoom room) {
-        int chatroomid = room.getId();
-        this.getJoinedRoomIds().remove(chatroomid);
-        this.getAvailableRoomIds().add(chatroomid);
+        int roomId = room.getId();
+        this.joinedRoomIds.remove(Integer.valueOf(roomId));
+        this.availableRoomIds.add(roomId);
     }
 
     /**

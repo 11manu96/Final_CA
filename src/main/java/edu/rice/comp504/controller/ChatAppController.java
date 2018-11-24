@@ -1,6 +1,5 @@
 package edu.rice.comp504.controller;
 
-import edu.rice.comp504.model.res.AResponse;
 import edu.rice.comp504.model.DispatcherAdapter;
 
 import static spark.Spark.*;
@@ -37,6 +36,10 @@ public class ChatAppController {
      * @return The heroku assigned port number
      */
     private static int getHerokuAssignedPort() {
-        return 4567;
+        ProcessBuilder processBuilder = new ProcessBuilder();
+        if (processBuilder.environment().get("PORT") != null) {
+            return Integer.parseInt(processBuilder.environment().get("PORT"));
+        }
+        return 4567; // return default port if heroku-port isn't set.
     }
 }

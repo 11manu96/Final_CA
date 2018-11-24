@@ -1,20 +1,22 @@
-'use strict';
+"use strict";
 
 const webSocket = new WebSocket("ws://" + location.hostname + ":" + location.port + "/chatapp");
+var loggedIn = false;
+var currentRoom = null;
 
 /**
  * Entry point into chat room
  */
 window.onload = function() {
-    $("#btn-login").onclick(logIn);
-    $("#btn-enter").onclick(enterRoom);
-    $("#btn-exit").onclick(exitRoom);
-    $("#btn-exit-all").onclick(exitAllRooms);
-    $("#btn-join").onclick(joinRoom);
-    $("#btn-create").onclick(createRoom);
-    $(".opt-room-user").onclick(loadMessages);
-    $("#btn-send").onclick(sendMessage);
-    $("#btn-send-all").onclick(sendAll);
+    $("#btn-login").click(logIn);
+    $("#btn-enter").click(enterRoom);
+    $("#btn-exit").click(exitRoom);
+    $("#btn-exit-all").click(exitAllRooms);
+    $("#btn-join").click(joinRoom);
+    $("#btn-create").click(createRoom);
+    $(".opt-room-user").click(loadMessages);
+    $("#btn-send").click(sendMessage);
+    $("#btn-send-all").click(sendAll);
 
     webSocket.onmessage = function(message) {
         updateChatApp(message);
@@ -29,20 +31,26 @@ function logIn() {
     var userAge = $("#user-age").val();
     var userLocation = $("#user-location").val();
     var userSchool = $("#user-school").val();
+    webSocket.send(JSON.stringify({"type": "login", "body":
+            {"name": userName, "age": userAge, "location": userLocation, "school": userSchool}}));
 }
 
 /**
  * Send request to websocket to enter room
  */
 function enterRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val();
+    var selectedRoom = $("#slt-joined-rooms").val()[0];
+    currentRoom = selectedRoom;
+    webSocket.send(JSON.stringify({"type": "query", "body": {"query": "roomUsers", "roomId": selectedRoom}}));
 }
 
 /**
  * Send request to websocket to exit all rooms
  */
 function exitRoom() {
-    var selectedRoom = $("#slt-joined-rooms").val();
+    // TODO: enforce single selection
+    var selectedRoom = $("#slt-joined-rooms").val()[0];
+    webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": selectedRoom}}));
 }
 
 /**
@@ -56,7 +64,9 @@ function exitAllRooms() {
  * Send request to websocket to join room
  */
 function joinRoom() {
-    var selectedRoom = $("#slt-available-rooms").val();
+    // TODO: enforce single selection
+    var selectedRoom = $("#slt-available-rooms").val()[0];
+    webSocket.send(JSON.stringify({"type": "join", "body": {"roomId": selectedRoom}}));
 }
 
 /**
@@ -68,6 +78,9 @@ function createRoom() {
     var roomMaxAge = $("#room-max-age").val();
     var roomLocations = $("#slt-room-location").val();
     var roomSchools = $("#slt-room-school").val();
+    webSocket.send(JSON.stringify({"type": "create", "body":
+            {"roomName": roomName, "ageLower": roomMinAge, "ageUpper": roomMaxAge,
+                "location": roomLocations, "school": roomSchools}}));
 }
 
 /**
@@ -83,6 +96,8 @@ function loadMessages() {
 function sendMessage() {
     var user = $("#slt-room-users").val();
     var message = $("#chat-message").val();
+    webSocket.send(JSON.stringify({"type": "send", "body":
+            {"roomId": userName, "message": message, "receiverId": user}}));
 }
 
 /**
@@ -90,6 +105,8 @@ function sendMessage() {
  */
 function sendAll() {
     var message = $("#chat-message").val();
+    webSocket.send(JSON.stringify({"type": "send", "body":
+            {"roomId": userName, "message": message, "receiverId": "All"}}));
 }
 
 /**
@@ -98,27 +115,39 @@ function sendAll() {
  */
 function updateChatApp(message) {
     // parse message to determine how to update view
-    // convert the data to JSON and append the message to the chat area
-    // var data = JSON.parse(message.data);
-    // $("#chatArea").append(data.userMessage);
+    var responseBody = JSON.parse(message.data);
+    //console.log(responseBody);
+    if (responseBody.type === "UserRoomResponse") {
+        // login, create room, join room, exit room
 
-    // var chatHistory = "";
-    // var mesList = "";
-    // var roomUsers = "";
-    // var userList = "";
-    // // chatHistory = data.chatHistory;
-    // // roomUsers = data.roomUsers;
-    //
-    // // update Room messages
-    // chatHistory = ['1','2','3'];// debug data
-    // $.each(chatHistory,function(i,item){
-    //     mesList += "<ul>"+item+"</ul>";
-    // });
-    // $("#chat-dialog").html(mesList);
-    // // update Room users
-    // roomUsers = ['U1','U2','U3'];// debug data
-    // $.each(roomUsers,function(i,item){
-    //     userList += "<option class='opt-room-user'>"+item+"</option>";
-    // });
-    // $("#slt-room-users").html(userList);
+        // enable buttons
+        if (loggedIn === false) {
+            loggedIn = true;
+            $(".logged-in").prop("disabled", false);
+            $(".not-logged-in").prop("disabled", true);
+        }
+        $("#slt-joined-rooms").empty();
+        $("#slt-available-rooms").empty();
+
+        // need to get room name somehow
+        responseBody.joinedRoomIds.forEach(function(roomId) {
+            $("#slt-joined-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+        });
+        responseBody.availableRoomIds.forEach(function(roomId) {
+            $("#slt-available-rooms").append($("<option></option>").attr("value", roomId).text('Room ' + roomId));
+        });
+    } else if (responseBody.type === "RoomUsersResponse") {
+
+
+        $("#slt-room-users").empty();
+        var userList  = responseBody.users
+        var result = Object.keys(userList).map(function(key) {
+            console.log(userList[key], Number(key))
+            $("#slt-room-users").append($("<option></option>").attr("value", Number(key)).text(userList[key]))
+
+        });
+
+
+
+    }
 }

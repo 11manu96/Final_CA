@@ -1,7 +1,11 @@
 package edu.rice.comp504.model.obj;
 
 import edu.rice.comp504.model.DispatcherAdapter;
+import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
+import edu.rice.comp504.model.res.RoomNotificationResponse;
+import edu.rice.comp504.model.res.RoomUsersResponse;
+import edu.rice.comp504.model.res.UserRoomResponse;
 
 import java.util.*;
 import java.util.Observable;
@@ -116,6 +120,12 @@ public class ChatRoom extends Observable {
     }
 
     /**
+     * sets users in the chat room
+     */
+    public void setUsers(Map<Integer, String> map) {
+         this.userNameFromUserId = map;
+    }
+    /**
      * Check if user satisfy the age, location and school restriction
      * @return boolean value indicating whether the user is eligible to join the room
      */
@@ -145,6 +155,19 @@ public class ChatRoom extends Observable {
      * Create a user joined notification message and then add user into the observer list
      */
     public boolean addUser(User user) {
+
+        // user available rooms only contains eligible rooms
+        if (user.getAvailableRoomIds().contains(this.id)) {
+            this.userNameFromUserId.put(user.getId(), user.getName());
+            addObserver(user);
+            user.moveToJoined(this);
+
+            JoinRoomCmd joinRoomCmd = new JoinRoomCmd(this, user);
+            setChanged();
+            notifyObservers(joinRoomCmd);
+
+            return true;
+        }
         return false;
     }
 
@@ -155,15 +178,20 @@ public class ChatRoom extends Observable {
      */
     public boolean removeUser(User user, String reason) {
         int userid = user.getId();
-        Map<Integer,String> users = this.getUsers();
-        if (users.containsKey(userid)) {
-            users.remove(user.getId());
-            notifications.add(reason);
+        if (this.userNameFromUserId.containsKey(userid)) {
+            this.userNameFromUserId.remove(userid);
             deleteObserver(user);
+            user.moveToAvailable(this);
+
+            this.notifications.add(reason);
+
+            LeaveRoomCmd leaveRoomCmd = new LeaveRoomCmd(this, user);
+            setChanged();
+            notifyObservers(leaveRoomCmd);
+
             return true;
-        }  else {
-            return false;
         }
+        return false;
     }
 
     /**

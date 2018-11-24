@@ -1,42 +1,34 @@
 package edu.rice.comp504.model.cmd;
 
+import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
+import edu.rice.comp504.model.res.RoomNotificationResponse;
+import edu.rice.comp504.model.res.RoomUsersResponse;
+import edu.rice.comp504.model.res.UserRoomResponse;
 
 public class LeaveRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
-    private String reason;
 
-
-    public LeaveRoomCmd(ChatRoom chatRoom, User user, String reason) {
+    public LeaveRoomCmd(ChatRoom chatRoom, User user) {
         this.chatRoom = chatRoom;
         this.user = user;
-        this.reason = reason;
     }
 
-
-    public User getUser() {
-        return user;
-    }
-
-    public ChatRoom getChatRoom() {
-        return chatRoom;
-    }
-
-    public void setChatRoom(ChatRoom chatRoom) {
-        this.chatRoom = chatRoom;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
 
     @Override
     public void execute(User context) {
-        if (context.getId() == user.getId()) {
-            chatRoom.removeUser(user, reason);
-            user.moveToAvailable(chatRoom);
+        // if this user is joining, then update rooms lists
+        if (this.user == context) {
+            UserRoomResponse userRoomResponse = new UserRoomResponse(this.user.getId(),
+                    this.user.getJoinedRoomIds(), this.user.getAvailableRoomIds());
+            DispatcherAdapter.notifyClient(context, userRoomResponse);
         }
+        // all users update room users list
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getNotifications());
+        RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
+        DispatcherAdapter.notifyClient(context, roomNotificationResponse);
+        DispatcherAdapter.notifyClient(context, roomUsersResponse);
     }
 }

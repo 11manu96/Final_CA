@@ -6,8 +6,8 @@ public class UserRoomResponse extends AResponse {
     private int userId;
     private List<Integer> joinedRoomIds;
     private List<Integer> availableRoomIds;
-    public UserRoomResponse(String type, int userId, List<Integer> joinedRoomIds, List<Integer> availableRoomIds) {
-        super(type);
+    public UserRoomResponse(int userId, List<Integer> joinedRoomIds, List<Integer> availableRoomIds) {
+        super("UserRoomResponse");
         this.userId = userId;
         this.joinedRoomIds = joinedRoomIds;
         this.availableRoomIds = availableRoomIds;
