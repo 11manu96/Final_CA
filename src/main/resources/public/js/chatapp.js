@@ -323,12 +323,37 @@ function addNewRoom(responseBody) {
  * @param responseBody
  */
 function loadMessages(responseBody) {
+
+
     // only update messages if chat room is open
     if (currentRoom == responseBody.chatHistory[0].roomId) {
         $("#chat-dialog").empty();
+        console.log(responseBody.chatHistory.length)
         responseBody.chatHistory.forEach(function (message) {
-            $("#chat-dialog").append($("<ul></ul>").text(
-                roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
+
+            if (message.isReceived == true){
+
+                if (message.senderId == currentUser) {
+                    $("#chat-dialog").append($("<ul></ul>").text(
+                        roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message).addClass("read"));
+                }else {
+                    $("#chat-dialog").append($("<ul></ul>").text(
+                        roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
+
+                }
+
+            }else if (message.isReceived == false) {
+                $("#chat-dialog").append($("<ul></ul>").text(
+                    roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
+
+                if (message.receiverId == currentUser){
+                    console.log("hey message recieved")
+                    sendAck(message.id)
+                }
+
+            }
+
+
         });
     }
 }
@@ -362,4 +387,10 @@ function updateChatApp(message) {
     } else if (responseBody.type === "RoomNotifications") {
         loadNotifications(responseBody);
     }
+}
+
+function sendAck(messageId) {
+
+    webSocket.send(JSON.stringify({"type": "ack", "body":
+            {"messageId": messageId}}));
 }

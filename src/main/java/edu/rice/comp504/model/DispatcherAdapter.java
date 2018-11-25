@@ -350,12 +350,7 @@ public class DispatcherAdapter extends Observable {
         Message message = messages.get(jo.get("messageId").getAsInt());
         message.setIsReceived(true);
 
-        //altering message in master message map
-        messages.put(message.getId(), message);
-
-        //changing the chatroom history
         ChatRoom chatRoom = rooms.get(message.getRoomId());
-        chatRoom.storeMessage(users.get(message.getSenderId()), users.get(message.getReceiverId()), message);
 
         //update the message's sender's chat history
         int roomId = chatRoom.getId();

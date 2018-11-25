@@ -11,6 +11,10 @@ ul {
     padding: 0;
 }
 
+.read {
+    color: #008000
+}
+
 .padded-box {
     padding: 0 50px;
 }
