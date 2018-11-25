@@ -48,6 +48,7 @@ function clearRoomUI() {
     $("#chat-dialog").empty();
     $("#slt-room-users").empty();
     $("#room-title").text("Room Name");
+    $("#room-notification").empty();
 }
 
 /**

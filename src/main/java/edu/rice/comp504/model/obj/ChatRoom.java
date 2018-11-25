@@ -157,7 +157,7 @@ public class ChatRoom extends Observable {
             addObserver(user);
             user.moveToJoined(this);
 
-            this.notifications.add(user.getName() + " joined Chat Room");
+            this.notifications.add(user.getName() + " joined " + this.getName());
 
             JoinRoomCmd joinRoomCmd = new JoinRoomCmd(this, user);
             setChanged();
