@@ -344,6 +344,21 @@ public class DispatcherAdapter extends Observable {
      */
     public void ackMessage(Session session, String body) {
 
+        JsonObject jo = new JsonParser().parse(body).getAsJsonObject().getAsJsonObject("body");
+
+        //altering the message
+        Message message = messages.get(jo.get("messageId").getAsInt());
+        message.setIsReceived(true);
+
+        ChatRoom chatRoom = rooms.get(message.getRoomId());
+
+        //update the message's sender's chat history
+        int roomId = chatRoom.getId();
+        int otherUserId = message.getSenderId();
+        User sender = users.get(otherUserId);
+        UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse(
+                getChatHistory(roomId, getUserIdFromSession(session), otherUserId));
+        notifyClient(sender.getSession(), userChatHistoryResponse);
     }
 
     /**
