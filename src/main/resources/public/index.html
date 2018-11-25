@@ -88,20 +88,20 @@
                     <tr>
                         <td>Name:</td>
                         <td>
-                            <input id="room-name" type="text" placeholder="Enter room name" onclick="clearChatRoomError()">
+                            <input id="room-name" type="text" placeholder="Enter room name" onclick="clearCreateRoomError()">
                         </td>
                     </tr>
                     <tr>
                         <td>Ages:</td>
                         <td>
-                            <input id="room-min-age" type="number" min="0" max="100" placeholder="Min" onclick="clearChatRoomError()"> -
-                            <input id="room-max-age" type="number" min="0" max="100" placeholder="Max" onclick="clearChatRoomError()">
+                            <input id="room-min-age" type="number" min="0" max="100" placeholder="Min" onclick="clearCreateRoomError()"> -
+                            <input id="room-max-age" type="number" min="0" max="100" placeholder="Max" onclick="clearCreateRoomError()">
                         </td>
                     </tr>
                     <tr>
                         <td>Locations:</td>
                         <td>
-                            <select id="slt-room-location" multiple size="7" class="full-width" onclick="clearChatRoomError()">
+                            <select id="slt-room-location" multiple size="7" class="full-width" onclick="clearCreateRoomError()">
                                 <option>North America</option>
                                 <option>South America</option>
                                 <option>Europe</option>
@@ -115,7 +115,7 @@
                     <tr>
                         <td>Schools:</td>
                         <td>
-                            <select id="slt-room-school" multiple size="5" class="full-width" onclick="clearChatRoomError()">
+                            <select id="slt-room-school" multiple size="5" class="full-width" onclick="clearCreateRoomError()">
                                 <option>Rice</option>
                                 <option>Harvard</option>
                                 <option>Duke</option>
@@ -136,14 +136,14 @@
             </div>
             <div class="fill-row fill-box">
                 <div class="fifth-box">
-                    <select id="slt-room-users" multiple size="20" class="full-width full-height">
+                    <select id="slt-room-users" multiple size="20" class="full-width full-height" onclick="clearChatRoomError()">
                     </select>
                 </div>
                 <div class="fill-col fill-box">
                     <div id="chat-dialog" class="fill-box">
                     </div>
                     <div class="fill-row">
-                        <input id="chat-message" type="text" class="fill-box">
+                        <input id="chat-message" type="text" class="fill-box" onclick="clearChatRoomError()">
                         <button id="btn-send" class="logged-in" disabled>Send Message</button>
                         <button id="btn-send-all" class="owner-only" disabled>Send All</button>
                     </div>
