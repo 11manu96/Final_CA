@@ -21,6 +21,21 @@ window.onload = function() {
     $("#btn-send").click(sendMessage);
     $("#btn-send-all").click(sendAll);
 
+    $("#user-name").click(clearLoginError);
+    $("#user-age").click(clearLoginError);
+
+    $("#slt-joined-rooms").click(clearRoomSelectError);
+    $("#slt-available-rooms").click(clearRoomSelectError);
+
+    $("#room-name").click(clearCreateRoomError);
+    $("#room-min-age").click(clearCreateRoomError);
+    $("#room-max-age").click(clearCreateRoomError);
+    $("#slt-room-location").click(clearCreateRoomError);
+    $("#slt-room-school").click(clearCreateRoomError);
+
+    $("#slt-room-users").click(clearChatRoomError);
+    $("#chat-message").click(clearChatRoomError);
+
     webSocket.onmessage = function(message) {
         updateChatApp(message);
     };
@@ -38,7 +53,7 @@ function clearRoomUI() {
 /**
  * Clear login errors
  */
-function clearError() {
+function clearLoginError() {
     $("#user-name").removeClass("error");
     $("#user-age").removeClass("error");
 }
@@ -131,6 +146,7 @@ function exitRoom() {
 function exitAllRooms() {
     currentRoom = null;
     clearRoomUI();
+    clearRoomSelectError();
     webSocket.send(JSON.stringify({"type": "leave", "body": {"roomId": "All"}}));
 }
 
