@@ -3,6 +3,7 @@ package edu.rice.comp504.model.cmd;
 import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
+import edu.rice.comp504.model.res.RoomNotificationResponse;
 import edu.rice.comp504.model.res.RoomUsersResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
 
@@ -35,5 +36,10 @@ public class JoinRoomCmd implements IUserCmd {
         // all users update room users list
         RoomUsersResponse roomUsersResponse = new RoomUsersResponse(this.chatRoom.getId(), this.chatRoom.getUsers());
         DispatcherAdapter.notifyClient(context, roomUsersResponse);
+
+        RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getId(),
+                this.chatRoom.getNotifications());
+        DispatcherAdapter.notifyClient(context, roomNotificationResponse);
+
     }
 }
