@@ -323,12 +323,14 @@ function addNewRoom(responseBody) {
  * @param responseBody
  */
 function loadMessages(responseBody) {
-    // TODO: check that message is for the room currently open?
-    $("#chat-dialog").empty();
-    responseBody.chatHistory.forEach(function (message) {
-        $("#chat-dialog").append($("<ul></ul>").text(
-            roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
-    });
+    // only update messages if chat room is open
+    if (currentRoom == responseBody.chatHistory[0].roomId) {
+        $("#chat-dialog").empty();
+        responseBody.chatHistory.forEach(function (message) {
+            $("#chat-dialog").append($("<ul></ul>").text(
+                roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
+        });
+    }
 }
 
 /**
