@@ -380,8 +380,7 @@ public class DispatcherAdapter extends Observable {
                     break;
                 case "userChatHistory":
                     roomId = jo.get("roomId").getAsInt();
-                    System.out.println(jo.get("otherUserId").getAsString());
-                    int otherUserId = Integer.parseInt(jo.get("otherUserId").getAsString());
+                    int otherUserId = jo.get("otherUserId").getAsInt();
                     UserChatHistoryResponse userChatHistoryResponse = new UserChatHistoryResponse(
                             getChatHistory(roomId, getUserIdFromSession(session), otherUserId));
                     notifyClient(session, userChatHistoryResponse);
