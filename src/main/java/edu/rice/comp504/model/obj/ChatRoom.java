@@ -3,17 +3,14 @@ package edu.rice.comp504.model.obj;
 import edu.rice.comp504.model.DispatcherAdapter;
 import edu.rice.comp504.model.cmd.JoinRoomCmd;
 import edu.rice.comp504.model.cmd.LeaveRoomCmd;
-import edu.rice.comp504.model.cmd.RemoveRoomCmd;
-import edu.rice.comp504.model.res.RoomNotificationResponse;
-import edu.rice.comp504.model.res.RoomUsersResponse;
-import edu.rice.comp504.model.res.UserRoomResponse;
 
 import java.util.*;
 import java.util.Observable;
 import java.util.concurrent.ConcurrentHashMap;
-/*
-The Chatroom class defines a chat room object and private fileds of a chat room
-*/
+
+/**
+ * The Chatroom class defines a chat room object and private fields of a chat room.
+ */
 public class ChatRoom extends Observable {
 
     private int id;
@@ -67,7 +64,7 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Get the chat room id
+     * Get the chat room id.
      * @return the chat room id
      * */
     public int getId() {
@@ -75,7 +72,7 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Get the chat room name
+     * Get the chat room name.
      * @return the chat room name
      * */
     public String getName() {
@@ -83,7 +80,7 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Get the chat room owner
+     * Get the chat room owner.
      * @return a User object which is the owner of the chat room
      * */
     public User getOwner() {
@@ -91,7 +88,7 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Get a list of notifications
+     * Get a list of notifications.
      * @return notification list
      * */
     public List<String> getNotifications() {
@@ -99,7 +96,7 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Get the chat history between two users
+     * Get the chat history between two users.
      * @return chat history
      * */
     public Map<String, List<Message>> getChatHistory() {
@@ -107,21 +104,23 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * @return the dispatcher
-     * */
+     * Return dispatch adapter.
+     * @return dispatch adapter
+     */
     public DispatcherAdapter getDispatcher() {
         return this.dis;
     }
 
     /**
-     * Return users in the chat room
+     * Return users in the chat room.
+     * @return users map
      */
     public Map<Integer, String> getUsers() {
         return this.userNameFromUserId;
     }
 
     /**
-     * Check if user satisfy the age, location and school restriction
+     * Check if user satisfy the age, location and school restriction.
      * @return boolean value indicating whether the user is eligible to join the room
      */
     public boolean applyFilter(User user) {
@@ -138,19 +137,23 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Modify the current room age, location or school restriction
-     * Then apply the new restriction to all users in the chat room
+     * Modify the current room age, location or school restriction.
+     * Then apply the new restriction to all users in the chat room.
+     * @param lower min age
+     * @param upper max age
+     * @param locations location restriction
+     * @param schools school restriction
      */
     public void modifyFilter(int lower, int upper, String[] locations, String[] schools) {
-
     }
 
     /**
-     * If user satisfy all restrictions and has the room in his available room list
-     * Create a user joined notification message and then add user into the observer list
+     * If user satisfy all restrictions and has the room in his available room list.
+     * Create a user joined notification message and then add user into the observer list.
+     * @param user user being added
+     * @return whether user was added successfully
      */
     public boolean addUser(User user) {
-
         // user available rooms only contains eligible rooms
         if (user.getAvailableRoomIds().contains(this.id)) {
             this.userNameFromUserId.put(user.getId(), user.getName());
@@ -169,9 +172,11 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Remove user from the chat room
-     * Set notification indicating the user left reason
-     * Delete user from observer list
+     * Remove user from the chat room. Set notification indicating the user left reason.
+     * Delete user from observer list.
+     * @param user user to remove
+     * @param reason reason to remove user
+     * @return whether removal was successful
      */
     public boolean removeUser(User user, String reason) {
         int userid = user.getId();
@@ -189,7 +194,6 @@ public class ChatRoom extends Observable {
             if (user == this.owner) {
                 this.dis.unloadRoom(this.id);
             }
-
             deleteObserver(user);
 
             return true;
@@ -198,8 +202,11 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Append chat message into chat history list
-     * Map the single message body with key value (senderID&receiverID)
+     * Append chat message into chat history list.
+     * Map the single message body with key value (senderID&receiverID).
+     * @param sender sender user
+     * @param receiver receiver user
+     * @param message message to send
      */
     public void storeMessage(User sender, User receiver, Message message) {
         int userAId = sender.getId();
@@ -214,9 +221,9 @@ public class ChatRoom extends Observable {
     }
 
     /**
-     * Parse the key and remove chat history related to user
+     * Parse the key and remove chat history related to user.
+     * @param user user
      */
     private void freeChatHistory(User user) {
-        // TODO: parse the key and remove chat history related to user
     }
 }

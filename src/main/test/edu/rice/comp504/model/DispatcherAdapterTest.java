@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Test the basic functions in DispatchAdapter.
+ * Test the basic functions in DispatchAdapter. *Run app first before running tests.*
  */
 @org.eclipse.jetty.websocket.api.annotations.WebSocket
 public class DispatcherAdapterTest extends TestCase {

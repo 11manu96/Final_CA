@@ -5,12 +5,15 @@ import edu.rice.comp504.model.obj.ChatRoom;
 import edu.rice.comp504.model.obj.User;
 import edu.rice.comp504.model.res.UserRoomResponse;
 
+/**
+ * Command to execute when room is deleted.
+ */
 public class RemoveRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
 
     /**
      * Constructor.
-     * @param chatRoom chatRoom
+     * @param chatRoom room that is deleted
      */
     public RemoveRoomCmd(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;

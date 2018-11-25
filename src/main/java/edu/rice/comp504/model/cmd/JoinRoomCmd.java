@@ -7,14 +7,17 @@ import edu.rice.comp504.model.res.RoomNotificationResponse;
 import edu.rice.comp504.model.res.RoomUsersResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
 
+/**
+ * Command to execute when joining a room.
+ */
 public class JoinRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
 
     /**
      * Constructor.
-     * @param chatRoom chatRoom
-     * @param user user
+     * @param chatRoom chat room user is joining
+     * @param user user joining chat room
      */
     public JoinRoomCmd(ChatRoom chatRoom, User user) {
         this.chatRoom = chatRoom;
@@ -40,6 +43,5 @@ public class JoinRoomCmd implements IUserCmd {
         RoomNotificationResponse roomNotificationResponse = new RoomNotificationResponse(this.chatRoom.getId(),
                 this.chatRoom.getNotifications());
         DispatcherAdapter.notifyClient(context, roomNotificationResponse);
-
     }
 }
