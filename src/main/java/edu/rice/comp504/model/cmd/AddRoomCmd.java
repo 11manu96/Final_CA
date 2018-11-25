@@ -6,12 +6,15 @@ import edu.rice.comp504.model.obj.User;
 import edu.rice.comp504.model.res.NewRoomResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
 
+/**
+ * Command to execute when creating a new room.
+ */
 public class AddRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
 
     /**
      * Constructor.
-     * @param chatRoom chatRoom
+     * @param chatRoom room that is created
      */
     public AddRoomCmd(ChatRoom chatRoom) {
         this.chatRoom = chatRoom;

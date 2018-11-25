@@ -6,11 +6,11 @@ import org.eclipse.jetty.websocket.api.Session;
 import java.util.*;
 import java.util.Observable;
 import java.util.Observer;
-/*
-The User class defines a user object and private fields of a user
-*/
-public class User implements Observer {
 
+/**
+ * The User class defines a user object and private fields of a user.
+ */
+public class User implements Observer {
     private int id;
     private transient Session session;
 
@@ -54,7 +54,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get current user id
+     * Get current user id.
      * @return the user id
      * */
     public int getId() {
@@ -62,7 +62,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get current user session
+     * Get current user session.
      * @return the user session
      * */
     public Session getSession() {
@@ -70,7 +70,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get the user name
+     * Get the user name.
      * @return the user name
      * */
     public String getName() {
@@ -78,7 +78,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get the user age
+     * Get the user age.
      * @return the user age
      * */
     public int getAge() {
@@ -86,7 +86,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get the user location
+     * Get the user location.
      * @return the user register location in String
      * */
     public String getLocation() {
@@ -94,7 +94,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get the user school
+     * Get the user school.
      * @return the user register school in String
      * */
     public String getSchool() {
@@ -102,7 +102,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get a list of user joined chat rooms
+     * Get a list of user joined chat rooms.
      * @return joined rooms ids
      * */
     public List<Integer> getJoinedRoomIds() {
@@ -110,7 +110,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get a list of user available chat rooms
+     * Get a list of user available chat rooms.
      * @return available chat rooms ids
      * */
     public List<Integer> getAvailableRoomIds() {
@@ -118,7 +118,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get a chat room id then store into available chat room list
+     * Get a chat room id then store into available chat room list.
      * @param room the chat room object
      * */
     public void addRoom(ChatRoom room) {
@@ -127,7 +127,7 @@ public class User implements Observer {
     }
 
     /**
-     * Get a chat room id then remove it from both user joined rooms list and available rooms list
+     * Get a chat room id then remove it from both user joined rooms list and available rooms list.
      * @param room the chat room object
      * */
     public void removeRoom(ChatRoom room) {
@@ -137,7 +137,7 @@ public class User implements Observer {
     }
 
     /**
-     * Move a chat room from available room list to joined room list
+     * Move a chat room from available room list to joined room list.
      * @param room the chat room object
      * */
     public void moveToJoined(ChatRoom room) {
@@ -147,7 +147,7 @@ public class User implements Observer {
     }
 
     /**
-     * Move a chat room from joined room list to available room list
+     * Move a chat room from joined room list to available room list.
      * @param room the chat room object
      * */
     public void moveToAvailable(ChatRoom room) {
@@ -157,12 +157,13 @@ public class User implements Observer {
     }
 
     /**
-     * User update when observable has changed
-     * */
+     * User update when observable has changed.
+     * @param o observable dispatch adapter or chat room
+     * @param arg command to execute
+     */
     @Override
     public void update(Observable o, Object arg) {
         IUserCmd cmd = (IUserCmd) arg;
         cmd.execute(this);
     }
-
 }

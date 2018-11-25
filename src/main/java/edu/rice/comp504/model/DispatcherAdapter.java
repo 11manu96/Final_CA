@@ -16,7 +16,6 @@ import edu.rice.comp504.model.obj.User;
 import edu.rice.comp504.model.res.*;
 
 public class DispatcherAdapter extends Observable {
-
     private int nextUserId;
     private int nextRoomId;
     private int nextMessageId;
@@ -147,7 +146,6 @@ public class DispatcherAdapter extends Observable {
             }
 
             // get owner
-
             int ownerId = getUserIdFromSession(session);
             User owner = this.users.get(ownerId);
 
@@ -165,10 +163,9 @@ public class DispatcherAdapter extends Observable {
                 notifyObservers(addRoomCmd);
 
                 return newRoom;
-            } else {
-                // TODO: notify the owner he is invalid
-                return null;
             }
+            notifyClient(session, new NullResponse());
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             notifyClient(session, new NullResponse());
@@ -325,7 +322,7 @@ public class DispatcherAdapter extends Observable {
                     // store the message
                     chatRoom.storeMessage(sender, receiver, message);
 
-                    //response
+                    // response
                     notifyClient(receiver, new UserChatHistoryResponse(getChatHistory(roomId, senderId, receiverId)));
                     notifyClient(sender, new UserChatHistoryResponse(getChatHistory(roomId, senderId, receiverId)));
                 }
@@ -404,7 +401,6 @@ public class DispatcherAdapter extends Observable {
         notifyClient(user.getSession(), response);
     }
 
-
     /**
      * Notify session about the message.
      *
@@ -418,7 +414,6 @@ public class DispatcherAdapter extends Observable {
             e.printStackTrace();
         }
     }
-
 
     /**
      * Get the names of all chat room members.
@@ -449,18 +444,19 @@ public class DispatcherAdapter extends Observable {
      * @return chat history between user A and user B at a chat room
      */
     private List<Message> getChatHistory(int roomId, int userAId, int userBId) {
-        //get all chatHistory
+        // get all chatHistory
         ChatRoom chatRoom = rooms.get(roomId);
         Map<String, List<Message>> chatHistory = chatRoom.getChatHistory();
 
-        //combine two users
+        // combine two users
         String combineId = userAId < userBId ?
                 String.valueOf(userAId) + "&" + String.valueOf(userBId) : String.valueOf(userBId) + "&" + String.valueOf(userAId);
 
-        //filter the chatHistory
+        // filter the chatHistory
         for (Map.Entry<String, List<Message>> entry : chatHistory.entrySet()) {
-            if (entry.getKey().equals(combineId))
+            if (entry.getKey().equals(combineId)) {
                 return entry.getValue();
+            }
         }
 
         return null;

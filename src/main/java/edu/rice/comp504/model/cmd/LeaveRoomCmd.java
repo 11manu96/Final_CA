@@ -7,16 +7,27 @@ import edu.rice.comp504.model.res.RoomNotificationResponse;
 import edu.rice.comp504.model.res.RoomUsersResponse;
 import edu.rice.comp504.model.res.UserRoomResponse;
 
+/**
+ * Command to execute when leaving a room.
+ */
 public class LeaveRoomCmd implements IUserCmd {
     private ChatRoom chatRoom;
     private User user;
 
+    /**
+     * Constructor.
+     * @param chatRoom chat room user is leaving
+     * @param user user leaving room
+     */
     public LeaveRoomCmd(ChatRoom chatRoom, User user) {
         this.chatRoom = chatRoom;
         this.user = user;
     }
 
-
+    /**
+     * Execute the command.
+     * @param context user
+     */
     @Override
     public void execute(User context) {
         // only send message to live sessions

@@ -25,7 +25,6 @@ public class WebSocketController {
 
     }
 
-
     /**
      * Send a message.
      *
