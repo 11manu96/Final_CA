@@ -383,7 +383,7 @@ public class DispatcherAdapterTest extends TestCase {
     /**
      * users only see the messages they are suppose to view
      */
-    public void filterMessages() {
+    public void testFilterMessages() {
         DispatcherAdapter adapter = new DispatcherAdapter();
 
         //user0
@@ -413,16 +413,16 @@ public class DispatcherAdapterTest extends TestCase {
         jo = getSendMessageJson(0, message01, "1");
         adapter.sendMessage(session0, jo.toString());
 
+        //check user2 cannot see message01
+        assertEquals("user2 cannot see message01", null, chatRoom0.getChatHistory().get("0&2"));
+
         //user0 sends message to user2
         String message02 = "User0 sends message to user2";
         jo = getSendMessageJson(0, message02, "2");
         adapter.sendMessage(session0, jo.toString());
 
-        //check user2 cannot see message01
-        assertEquals("user2 cannot see message01", null, chatRoom0.getChatHistory().get("0&2"));
-
         //check user2 cannot see message02
-        assertEquals("user2 cannot see message01", message02, chatRoom0.getChatHistory().get("0&2").get(0));
+        assertEquals("user2 can see message02", message02, chatRoom0.getChatHistory().get("0&2").get(0).getMessage());
     }
 
     /**
