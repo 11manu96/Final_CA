@@ -441,7 +441,7 @@ public class DispatcherAdapter extends Observable {
 
         //combine two users
         String combineId = userAId < userBId ?
-                String.valueOf(userAId) + String.valueOf(userBId) : String.valueOf(userBId) + String.valueOf(userAId);
+                String.valueOf(userAId) + "&" + String.valueOf(userBId) : String.valueOf(userBId) + "&" + String.valueOf(userAId);
 
         //filter the chatHistory
         for (Map.Entry<String, List<Message>> entry : chatHistory.entrySet()) {

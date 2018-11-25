@@ -203,7 +203,7 @@ public class ChatRoom extends Observable {
         int userAId = sender.getId();
         int userBId = receiver.getId();
         String combineId = userAId < userBId ?
-                String.valueOf(userAId) + String.valueOf(userBId) : String.valueOf(userBId) + String.valueOf(userAId);
+                String.valueOf(userAId) + "&" + String.valueOf(userBId) : String.valueOf(userBId) + "&" + String.valueOf(userAId);
 
         if (!this.chatHistory.containsKey(combineId)) {
             this.chatHistory.put(combineId, new ArrayList<>());
