@@ -478,7 +478,8 @@ public class DispatcherAdapterTest extends TestCase {
         adapter.leaveRoom(session1, getLeaveRoomJson("0").toString());
 
         //check chatRoom0 has notification
-        assertEquals("chatRoom0 has notification", "user1 left chatRoom0", chatRoom0.getNotifications().get(0));
+        List<String> notifications = chatRoom0.getNotifications();
+        assertEquals("chatRoom0 has notification", "user1 left chatRoom0", notifications.get(notifications.size() - 1));
     }
 
     /**
