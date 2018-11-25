@@ -58,6 +58,9 @@ public class WebSocketController {
             case "query":
                 dis.query(user, message);
                 break;
+            case "ack":
+                dis.ackMessage(user, message);
+                break;
             default:
                 break;
         }
