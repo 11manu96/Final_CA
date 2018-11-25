@@ -328,26 +328,29 @@ function loadMessages(responseBody) {
         $("#chat-dialog").empty();
     }
     // only update messages if chat room is open
-    if (currentRoom == responseBody.chatHistory[0].roomId) {
-        $("#chat-dialog").empty();
-        responseBody.chatHistory.forEach(function (message) {
-            var messageElement = $("<ul></ul>")
-                .text(roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message);
+    if (responseBody.chatHistory != null) {
+        if (currentRoom == responseBody.chatHistory[0].roomId) {
+            $("#chat-dialog").empty();
+            responseBody.chatHistory.forEach(function (message) {
+                var messageElement = $("<ul></ul>")
+                    .text(roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message);
 
-            // mark messages sent by user as read
-            if (message.isReceived == true){
-                if (message.senderId == currentUser) {
-                    messageElement.addClass("received");
+                // mark messages sent by user as read
+                if (message.isReceived == true){
+                    if (message.senderId == currentUser) {
+                        messageElement.addClass("received");
+                    }
+                } else {
+                    // acknowledge receipt of message by user
+                    if (message.receiverId == currentUser){
+                        webSocket.send(JSON.stringify({"type": "ack", "body": {"messageId": message.id}}));
+                    }
                 }
-            } else {
-                // acknowledge receipt of message by user
-                if (message.receiverId == currentUser){
-                    webSocket.send(JSON.stringify({"type": "ack", "body": {"messageId": message.id}}));
-                }
-            }
-            $("#chat-dialog").append(messageElement);
-        });
+                $("#chat-dialog").append(messageElement);
+            });
+        }
     }
+
 }
 
 /**
