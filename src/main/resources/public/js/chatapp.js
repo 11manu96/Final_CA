@@ -337,7 +337,7 @@ function loadMessages(responseBody) {
             // mark messages sent by user as read
             if (message.isReceived == true){
                 if (message.senderId == currentUser) {
-                    messageElement.addClass("read");
+                    messageElement.addClass("received");
                 }
             } else {
                 // acknowledge receipt of message by user
