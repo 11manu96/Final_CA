@@ -101,40 +101,36 @@ public class DispatcherAdapterTest extends TestCase {
     /**
      * A user should be notified that their message has been received
      */
-//    public void testReceiveMessageNotification() {
-//
-//        DispatcherAdapter adapter = new DispatcherAdapter();
-//        JsonObject jo;
-//
-//        //user0
-//        Session session0 = getSession();
-//        jo = getLoadUserJson("user0", 20, "Houston", "Rice University");
-//        User user0 = adapter.loadUser(session0, jo.toString());
-//
-//        //charRoom0
-//        List<String> locationList = Arrays.asList("Houston", "Austin");
-//        List<String> schoolList = Arrays.asList("Rice University", "Texas A&M University");
-//        jo = getLoadRoomJson("chatRoom0", 18, 30, locationList, schoolList);
-//        ChatRoom chatRoom0 = adapter.loadRoom(session0, jo.toString());
-//
-//        //user1
-//        Session session1 = getSession();
-//        jo = getLoadUserJson("user1", 22, "Houston", "Texas A&M University");
-//        User user1 = adapter.loadUser(session1, jo.toString());
-//
-//        //user1 joins chatRoom0
-//        adapter.joinRoom(session1, getJoinRoomJson(0).toString());
-//
-//        //user0 sends message to user1
-//        String message01 = "User0 sends message to user1.";
-//        jo = getSendMessageJson(0, message01, "1");
-//        adapter.sendMessage(session0, jo.toString());
-//
-//        //check the message has been sent
-//        Map<String, List<Message>> chatHistory0 = chatRoom0.getChatHistory();
-//        List<Message> filterChatHistory0 = chatHistory0.get("01");
-//        assertEquals("check user1 is notified that his message has been received", );
-//    }
+    public void testReceiveMessageNotification() {
+
+        DispatcherAdapter adapter = new DispatcherAdapter();
+        JsonObject jo;
+
+        //user0
+        Session session0 = getSession();
+        User user0 = loadUser0(session0, adapter);
+
+        //charRoom0
+        ChatRoom chatRoom0 = loadRoom0(session0, adapter);
+
+        //user1
+        Session session1 = getSession();
+        User user1 = loadUser1(session1, adapter);
+
+        //user1 joins chatRoom0
+        adapter.joinRoom(session1, getJoinRoomJson(0).toString());
+
+        //user0 sends message to user1
+        String message01 = "User0 sends message to user1.";
+        jo = getSendMessageJson(0, message01, "1");
+        adapter.sendMessage(session0, jo.toString());
+        adapter.ackMessage(session0, getAckMessageJson(0).toString());
+
+        //check the message is received, message will be set to green to notify the sender
+        Map<String, List<Message>> chatHistory0 = chatRoom0.getChatHistory();
+        List<Message> filterChatHistory0 = chatHistory0.get("0&1");
+        assertEquals("check user0 is notified that his message has been received", true, filterChatHistory0.get(0).getIsReceived());
+    }
 
     /**
      * A user may be in multiple chat rooms
@@ -654,6 +650,22 @@ public class DispatcherAdapterTest extends TestCase {
 
         JsonObject jo = new JsonObject();
         jo.addProperty("type", "leave");
+        jo.add("body", body);
+
+        return jo;
+    }
+
+    /**
+     * get the json object for leave chat room
+     * @param messageId the message id
+     * @return the json object
+     */
+    private JsonObject getAckMessageJson(int messageId) {
+        JsonObject body = new JsonObject();
+        body.addProperty("messageId", messageId);
+
+        JsonObject jo = new JsonObject();
+        jo.addProperty("type", "ack");
         jo.add("body", body);
 
         return jo;
