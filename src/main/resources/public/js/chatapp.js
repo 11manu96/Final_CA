@@ -323,37 +323,29 @@ function addNewRoom(responseBody) {
  * @param responseBody
  */
 function loadMessages(responseBody) {
-
-
+    // select user with no message history
+    if (responseBody.chatHistory == null) {
+        $("#chat-dialog").empty();
+    }
     // only update messages if chat room is open
     if (currentRoom == responseBody.chatHistory[0].roomId) {
         $("#chat-dialog").empty();
-        console.log(responseBody.chatHistory.length)
         responseBody.chatHistory.forEach(function (message) {
+            var messageElement = $("<ul></ul>")
+                .text(roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message);
 
+            // mark messages sent by user as read
             if (message.isReceived == true){
-
                 if (message.senderId == currentUser) {
-                    $("#chat-dialog").append($("<ul></ul>").text(
-                        roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message).addClass("read"));
-                }else {
-                    $("#chat-dialog").append($("<ul></ul>").text(
-                        roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
-
+                    messageElement.addClass("read");
                 }
-
-            }else if (message.isReceived == false) {
-                $("#chat-dialog").append($("<ul></ul>").text(
-                    roomUsers[message.senderId] + "->" + roomUsers[message.receiverId] + ": " + message.message));
-
+            } else {
+                // acknowledge receipt of message by user
                 if (message.receiverId == currentUser){
-                    console.log("hey message recieved")
-                    sendAck(message.id)
+                    webSocket.send(JSON.stringify({"type": "ack", "body": {"messageId": message.id}}));
                 }
-
             }
-
-
+            $("#chat-dialog").append(messageElement);
         });
     }
 }
@@ -387,10 +379,4 @@ function updateChatApp(message) {
     } else if (responseBody.type === "RoomNotifications") {
         loadNotifications(responseBody);
     }
-}
-
-function sendAck(messageId) {
-
-    webSocket.send(JSON.stringify({"type": "ack", "body":
-            {"messageId": messageId}}));
 }

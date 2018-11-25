@@ -11,10 +11,6 @@ ul {
     padding: 0;
 }
 
-.read {
-    color: #008000
-}
-
 .padded-box {
     padding: 0 50px;
 }
@@ -61,7 +57,11 @@ ul {
 }
 
 .error {
-    border:2px solid red;
+    border: 2px solid red;
+}
+
+.read {
+    color: green;
 }
 
 #chat-dialog {
