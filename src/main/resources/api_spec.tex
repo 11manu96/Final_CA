@@ -22,7 +22,7 @@
 \begin{document}
 \maketitle
 
-We used the command, composite, and singleton design patterns for this Chat App. We have two controllers, the ChatAppController, the WebSocketController  and a DispatchAdapter to handle the requests and communications. We also have three top-level classes, the ChatRoom, the User and Message. All the objects use commands to act in the chat app. We also have an abstract class AResponse to pass information. \\
+We used the command design pattern for this Chat App. We have two controllers, the ChatAppController and the WebSocketController, and a DispatchAdapter to handle the requests and communications. We also have three top-level classes, ChatRoom, User, and Message. All the objects use commands to act in the chat app. We also have an abstract class AResponse to pass information to send information back to the view. \\
 
 In this document, we will discuss the use cases for the chat app. We will then break down the interfaces and classes in the model. 
 
@@ -57,40 +57,37 @@ In this document, we will discuss the use cases for the chat app. We will then b
     \item Remove user if message contains 'hate'
     \item Display messages appropriately for appropriate users
   \end{itemize}
-  \item Check ChatRooms User is in/can join, Users in ChatRoom
 \end{itemize}
 
 \section{View}
-We have several sections in our ChatApp - a login, a chat room list, the chat room, and a create chat room form. Each interaction in the view makes a request to the model by having the websocket send a request message via the WebSocketController.
+We have several sections in our ChatApp - a login, a chat room list, the chat room, and a create chat room form. Each interaction in the view makes a request to the model by having the websocket send a request message via the WebSocketController. These requests are parsed by the model to handle the appropriate changes and send a response. We also regularly send a ping request to the server to keep the session from going idle.
 
 \section{DispatchAdapter and Controller}
 We have one DispatchAdapter and two controllers: ChatAppController and WebSocketController. 
 
 \begin{itemize}
-\item DispatchAdapter has the fields and methods below
+\item DispatchAdapter has the following fields and methods:
 \begin{itemize}
 \item int nextUserId: the id of new user.
 \item int nextRoomId: the id of new room.
 \item int nextMessageId: the id of new message.
-\item Map<Integer, User> users maps user id to the user.
-\item Map<Integer, ChatRoom> rooms maps room id to the chat room. 
-\item Map<Integer, Message> messages maps message id to the message. 
-\item Map<Session, Integer> userIdFromSession maps session to user id. 
+\item Map\textless Integer, User\textgreater users: maps user id to the user.
+\item Map\textless Integer, ChatRoom\textgreater rooms: maps room id to the chat room. 
+\item Map\textless Integer, Message\textgreater messages: maps message id to the message. 
+\item Map\textless Session, Integer\textgreater userIdFromSession: maps session to user id. 
 \item newSession(Session session): Create a new session and enlarge the id of user by 1.
 \item getUserIdFromSession(Session session): Return the id of user from corresponding session.
 \item loadUser(Session session, String body): Load a user into the environment and return that loaded user object.
 \item loadRoom(Session session, String body): Load a chat room into the environment and return that loaded chat room object.
 \item unloadUser(int userId): Remove a user with given userId from the environment.
 \item unloadRoom(int roomId): Remove a room with given roomId from the environment.
-\item joinRoom(Session session, String body): Add a user to chat room, body is of format ``roomId"
-\item leaveRoom(Session session, String body): Remove a user from chat room, body is of format ``roomId"
-%public void modifyRoom(Session session, String body)
-%Modify the joining qualification of the chat room, body is of format ?roomId + lower + upper + {[location],}*{[location]} + {[school],}*{[school]}?.
-\item sendMessage(Session session, String body): A sender sends a string message to a receiver, body is of format ``roomId + receiverId + rawMessage".
-\item ackMessage(Session session, String body): Acknowledge the message from the receiver, body is of format ``msgId".
+\item joinRoom(Session session, String body): Add a user to chat room specified by room id in body.
+\item leaveRoom(Session session, String body): Remove a user from chat room specified by room id in body.
+\item sendMessage(Session session, String body): A sender sends a string message to a receiver with room id, receiver id and message information in the body.
+\item ackMessage(Session session, String body): Acknowledge the message from the receiver specified by message id in the body .
 \item notifyClient(User user, AResponse response): Notify the client for refreshing.
 \item notifyClient(Session session, AResponse response): Notify session about the message.
-\item query(Session session, String body): Send query result from controller to front end, body is in format ``type + roomId + [senderId] + [receiverId]".
+\item query(Session session, String body): Send query result from controller to front end, based on query request information in body.
 \item getUsers(int roomId): Return the names of all chat room members.
 \item getNotifications(int roomId): Return notifications in the chat room.
 \item getChatHistory(int roomId, int userAId, int userBId): Return chat history between user A and user B (commutative).
@@ -99,7 +96,7 @@ We have one DispatchAdapter and two controllers: ChatAppController and WebSocket
 \item ChatAppController is the main controller.
 \begin{itemize}
   \item main(String[] args): ChatApp entry point.
-  \item getHerokuAssignedPort(): get the heroku assigned port number.
+  \item getHerokuAssignedPort(): Get the heroku assigned port number.
 \end{itemize}
 
 \item WebSocketController creates a web socket for the server. 
@@ -112,7 +109,7 @@ We have one DispatchAdapter and two controllers: ChatAppController and WebSocket
 
 \section{Model}
 \subsection{Command}
-We have one interface for the commands: IUserCmd. This command will be executed by the Users and ChatRooms. It has one function: execute(Object context), which has the receiver (context) execute the command. All interactions between observables and their observers will be handled by the command design pattern. We have these concrete commands:
+We have one interface for the commands: IUserCmd. This command will be executed by the Users, which are observers of the DispatchAdapter and ChatRooms. It has one function: execute(Object context), which has the receiver (context) execute the command. All interactions between observables and their observers will be handled by the command design pattern. We have these concrete commands:
 \begin{itemize}
 \item addRoomCmd: is used when a chatroom is created by a user.
 \item joinRoomCmd: is used when a user wants to join a chatroom.
@@ -120,17 +117,16 @@ We have one interface for the commands: IUserCmd. This command will be executed 
 \item removeRoomCmd: is used when a chat room is deleted by its owner.
 \end{itemize}
 
-
 \subsection{Objects}
-We have three concrete objects: ChatRoom, User and Message. They are all observer/observables. 
+We have three concrete objects: ChatRoom, User, and Message.
 \begin{itemize}
-\item ChatRoom: initializes a new chat room with required attributes: age, owner, qualification. It also has methods to add/remove users and provide interface to owner to control the chat room.
-\item User: initializes a new user with required attributes: session, name, age, joined chat room. It also has methods to chat with other users or create/join/leave chat room.
+\item ChatRoom: initializes a new chat room with required attributes: age, owner, qualification. It also has methods to add/remove users and provide interface to owner to control the chat room. It is an observable observed by users in the chat room.
+\item User: initializes a new user with required attributes: session, name, age, joined chat room. It also has methods to chat with other users or create/join/leave chat room. It is an observer to the DispatchAdapter and the ChatRooms that the user is in.
 \item Message: initializes a new message with required attributes like: sender's id, receiver's id, message content, etc. It also has methods to get/set these info.
 \end{itemize}
 
 \subsection{Response}
-Response has one abstract class AResponse. It has one method: public String toJson() which converts the object to json string. It has these concrete classes:
+Response has one abstract class AResponse. Responses are used to send information about model changes back to the view. It has one method: public String toJson() which converts the object to json string. It has these concrete classes:
 \begin{itemize}
 \item NewRoomResponse: covers the information that a chat room is created by a user.
 \item NewUserResponse: covers the information that a user is created by a user.
@@ -143,15 +139,13 @@ Response has one abstract class AResponse. It has one method: public String toJs
 
 
 \section{Other Design Decisions}
+We also list here a summary of some of the design decisions for the chat app.
 \begin{itemize}
-\item Show latest notification regardless of room
+\item Show latest notification regardless of room currently open
 \item Received messages are shown in green
 \item Only show eligible rooms
-\item Can?t modify room restriction, no empty restrictions
+\item Can't modify room restriction, no empty restrictions
 \item Delete room when owner leaves
 \end{itemize}
-
-%\includegraphics[width=\textwidth]{request_handling} \\
-%\includegraphics[width=\textwidth]{message_sending}
 
 \end{document}
