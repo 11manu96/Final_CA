@@ -1,0 +1,151 @@
+\documentclass[letterpaper, 11pt]{article}
+\usepackage[letterpaper, margin=1.4in]{geometry}
+\usepackage{amsmath, amssymb}
+\usepackage{graphicx}
+\usepackage{verbatimbox}
+\usepackage{listings}
+\lstset{
+ basicstyle=\ttfamily,
+ columns=fullflexible,
+ frame=single,
+ breaklines=true,
+}
+\usepackage{caption}
+\usepackage{subcaption}
+
+\title{ChatApp API Specification}
+\author{Team Houston\\ Jonathan Wang, Manu Maheshwari, Yanjun Yang,\\ Tianqi Ma, Youyi Wei, Jiang Lin, Chengyin Liu}
+\date{}
+
+\setlength\parindent{0pt}
+
+\begin{document}
+\maketitle
+
+We used the command design pattern for this Chat App. We have two controllers, the ChatAppController and the WebSocketController, and a DispatchAdapter to handle the requests and communications. We also have three top-level classes, ChatRoom, User, and Message. All the objects use commands to act in the chat app. We also have an abstract class AResponse to pass information to send information back to the view. \\
+
+In this document, we will discuss the use cases for the chat app. We will then break down the interfaces and classes in the model. 
+
+\section{Use Cases}
+\begin{itemize}
+  \item Login
+  \begin{itemize}
+    \item Create user and map session to user
+     \end{itemize}
+  \item Create ChatRoom
+  \begin{itemize}
+    \item Send request message with chat room restrictions
+    \item Create chat room with user as owner
+    \item Add chat room to the room lists
+      \end{itemize}
+  \item Join ChatRoom
+  \begin{itemize}
+    \item User can only see chat rooms that it can join
+    \item Add user to the user lists of the room
+  \end{itemize}
+  \item Leave ChatRoom
+  \begin{itemize}
+    \item Exit one or all chat rooms
+    \item Send message about why user left
+    \item Destroy chat room if owner leaves
+  \end{itemize}
+  \item Send message
+  \begin{itemize}
+    \item Regular users send message to one user in chat room
+    \item Owner can send message to all users in chat room
+    \item Notify message has been received
+    \item Remove user if message contains 'hate'
+    \item Display messages appropriately for appropriate users
+  \end{itemize}
+\end{itemize}
+
+\section{View}
+We have several sections in our ChatApp - a login, a chat room list, the chat room, and a create chat room form. Each interaction in the view makes a request to the model by having the websocket send a request message via the WebSocketController. These requests are parsed by the model to handle the appropriate changes and send a response. We also regularly send a ping request to the server to keep the session from going idle.
+
+\section{DispatchAdapter and Controller}
+We have one DispatchAdapter and two controllers: ChatAppController and WebSocketController. 
+
+\begin{itemize}
+\item DispatchAdapter has the following fields and methods:
+\begin{itemize}
+\item int nextUserId: the id of new user.
+\item int nextRoomId: the id of new room.
+\item int nextMessageId: the id of new message.
+\item Map\textless Integer, User\textgreater users: maps user id to the user.
+\item Map\textless Integer, ChatRoom\textgreater rooms: maps room id to the chat room. 
+\item Map\textless Integer, Message\textgreater messages: maps message id to the message. 
+\item Map\textless Session, Integer\textgreater userIdFromSession: maps session to user id. 
+\item newSession(Session session): Create a new session and enlarge the id of user by 1.
+\item getUserIdFromSession(Session session): Return the id of user from corresponding session.
+\item loadUser(Session session, String body): Load a user into the environment and return that loaded user object.
+\item loadRoom(Session session, String body): Load a chat room into the environment and return that loaded chat room object.
+\item unloadUser(int userId): Remove a user with given userId from the environment.
+\item unloadRoom(int roomId): Remove a room with given roomId from the environment.
+\item joinRoom(Session session, String body): Add a user to chat room specified by room id in body.
+\item leaveRoom(Session session, String body): Remove a user from chat room specified by room id in body.
+\item sendMessage(Session session, String body): A sender sends a string message to a receiver with room id, receiver id and message information in the body.
+\item ackMessage(Session session, String body): Acknowledge the message from the receiver specified by message id in the body .
+\item notifyClient(User user, AResponse response): Notify the client for refreshing.
+\item notifyClient(Session session, AResponse response): Notify session about the message.
+\item query(Session session, String body): Send query result from controller to front end, based on query request information in body.
+\item getUsers(int roomId): Return the names of all chat room members.
+\item getNotifications(int roomId): Return notifications in the chat room.
+\item getChatHistory(int roomId, int userAId, int userBId): Return chat history between user A and user B (commutative).
+\end{itemize}
+
+\item ChatAppController is the main controller.
+\begin{itemize}
+  \item main(String[] args): ChatApp entry point.
+  \item getHerokuAssignedPort(): Get the heroku assigned port number.
+\end{itemize}
+
+\item WebSocketController creates a web socket for the server. 
+\begin{itemize}
+ \item onConnect(Session User): Defines the action when a new user session is connected.
+\item onClose(Session user, int statusCode, String reason): Defines the action when a user session is closed.
+\item onMessage(Session user, String message): Defines the action when a user session sends messages to the server.
+\end{itemize}
+\end{itemize}
+
+\section{Model}
+\subsection{Command}
+We have one interface for the commands: IUserCmd. This command will be executed by the Users, which are observers of the DispatchAdapter and ChatRooms. It has one function: execute(Object context), which has the receiver (context) execute the command. All interactions between observables and their observers will be handled by the command design pattern. We have these concrete commands:
+\begin{itemize}
+\item addRoomCmd: is used when a chatroom is created by a user.
+\item joinRoomCmd: is used when a user wants to join a chatroom.
+\item leaveRoomCmd: is used when a user wants to leave a chatroom.
+\item removeRoomCmd: is used when a chat room is deleted by its owner.
+\end{itemize}
+
+\subsection{Objects}
+We have three concrete objects: ChatRoom, User, and Message.
+\begin{itemize}
+\item ChatRoom: initializes a new chat room with required attributes: age, owner, qualification. It also has methods to add/remove users and provide interface to owner to control the chat room. It is an observable observed by users in the chat room.
+\item User: initializes a new user with required attributes: session, name, age, joined chat room. It also has methods to chat with other users or create/join/leave chat room. It is an observer to the DispatchAdapter and the ChatRooms that the user is in.
+\item Message: initializes a new message with required attributes like: sender's id, receiver's id, message content, etc. It also has methods to get/set these info.
+\end{itemize}
+
+\subsection{Response}
+Response has one abstract class AResponse. Responses are used to send information about model changes back to the view. It has one method: public String toJson() which converts the object to json string. It has these concrete classes:
+\begin{itemize}
+\item NewRoomResponse: covers the information that a chat room is created by a user.
+\item NewUserResponse: covers the information that a user is created by a user.
+\item NullResponse: covers no information, which is ba defualt message.
+\item RoomNotificationResponse: covers the information when some notification need to be broadcasted in the chatroom. 
+\item RoomUsersResponse: covers the information of all users in the chatroom.
+\item UserChatHistoryResponse: covers the information of all history messages in the chat room.
+\item UserRoomResponse: covers the information of all chat rooms of one user.
+\end{itemize}
+
+
+\section{Other Design Decisions}
+We also list here a summary of some of the design decisions for the chat app.
+\begin{itemize}
+\item Show latest notification regardless of room currently open
+\item Received messages are shown in green
+\item Only show eligible rooms
+\item Can't modify room restriction, no empty restrictions
+\item Delete room when owner leaves
+\end{itemize}
+
+\end{document}
