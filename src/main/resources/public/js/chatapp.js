@@ -36,6 +36,8 @@ window.onload = function() {
     $("#slt-room-users").click(clearChatRoomError);
     $("#chat-message").click(clearChatRoomError);
 
+    setInterval(pingServer, 1000);
+
     webSocket.onmessage = function(message) {
         updateChatApp(message);
     };
@@ -86,6 +88,12 @@ function clearChatRoomError() {
     $("#chat-message").removeClass("error");
 }
 
+/**
+ * Send ping request to keep session active
+ */
+function pingServer() {
+    webSocket.send(JSON.stringify({"type": "ping"}));
+}
 
 /**
  * Send request to websocket to create user
