@@ -483,6 +483,53 @@ public class DispatcherAdapterTest extends TestCase {
     }
 
     /**
+     * Remove user by user id
+     */
+    public void testUnloadUser() {
+        DispatcherAdapter adapter = new DispatcherAdapter();
+
+        //user0
+        Session session0 = getSession();
+        User user0 = loadUser0(session0, adapter);
+
+        //chatRoom0
+        ChatRoom chatRoom0 = loadRoom0(session0, adapter);
+
+        adapter.unloadUser(user0.getId());
+
+        assertEquals("user0 is removed from app", 0, adapter.countObservers());
+    }
+
+    /**
+     * Try making query request
+     */
+    public void testQuery() {
+        DispatcherAdapter adapter = new DispatcherAdapter();
+
+        //user0
+        Session session0 = getSession();
+        User user0 = loadUser0(session0, adapter);
+
+        //chatRoom0
+        ChatRoom chatRoom0 = loadRoom0(session0, adapter);
+
+        //user1
+        Session session1 = getSession();
+        User user1 = loadUser1(session1, adapter);
+
+        //user1 joins chatRoom0
+        adapter.joinRoom(session1, getJoinRoomJson(0).toString());
+
+        JsonObject jo = getQueryRoomJson(chatRoom0.getId());
+        adapter.query(session0, jo.toString());
+
+        jo = getQueryChatJson(chatRoom0.getId(), user1.getId());
+        adapter.query(session0, jo.toString());
+
+        // this does not make any model changes but should not crash
+    }
+
+    /**
      * get a new session
      * @return the session
      */
@@ -667,6 +714,40 @@ public class DispatcherAdapterTest extends TestCase {
 
         JsonObject jo = new JsonObject();
         jo.addProperty("type", "ack");
+        jo.add("body", body);
+
+        return jo;
+    }
+
+    /**
+     * get the json object for room users query
+     * @param roomId the room id
+     * @return the json object
+     */
+    private JsonObject getQueryRoomJson(int roomId) {
+        JsonObject body = new JsonObject();
+        body.addProperty("roomId", roomId);
+
+        JsonObject jo = new JsonObject();
+        jo.addProperty("type", "query");
+        jo.add("body", body);
+
+        return jo;
+    }
+
+    /**
+     * get the json object for room chat history
+     * @param roomId room id
+     * @param otherUserId other user id
+     * @return the json object
+     */
+    private JsonObject getQueryChatJson(int roomId, int otherUserId) {
+        JsonObject body = new JsonObject();
+        body.addProperty("roomId", roomId);
+        body.addProperty("otherUserId", otherUserId);
+
+        JsonObject jo = new JsonObject();
+        jo.addProperty("type", "query");
         jo.add("body", body);
 
         return jo;
